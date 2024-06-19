@@ -40,7 +40,7 @@ const Moon = () => {
     scene.add(light);
 
     const camera = new THREE.PerspectiveCamera(25, w / h, 0.1, 1000);
-    camera.position.z = 18;
+    camera.position.z = 14;
     scene.add(camera);
 
     const renderer = new THREE.WebGLRenderer({

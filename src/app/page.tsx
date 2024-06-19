@@ -11,7 +11,7 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <div className="absolute -top-[180px] -right-[170px]">
+      <div className="absolute -top-[0px] left-1/2 -translate-x-1/2">
         <Moon />
       </div>
       <>
