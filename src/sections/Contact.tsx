@@ -27,7 +27,7 @@ export default function Contact() {
             </h2>
             <p className="text-sm max-w-sm mt-4 text-neutral-300">
               Have a question or want to work together? Fill out the form below
-              and I'll get back to you as soon as possible.
+              and I will get back to you as soon as possible.
             </p>
             <div className="mt-5 md:mt-10">
               <h2 className="text-neutral-200 text-base font-bold">Socials</h2>
