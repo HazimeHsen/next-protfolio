@@ -27,21 +27,15 @@ const Moon = () => {
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    let w;
-    if (window.innerWidth < 800) {
-      w = window.innerWidth;
-    } else {
-      w = window.innerWidth / 2;
-    }
+    let w = window.innerWidth;
     let h = window.innerHeight;
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(100, 500, 1000);
+    light.position.set(0, 1000, 300);
     scene.add(light);
 
-    const camera = new THREE.PerspectiveCamera(25, w / h, 0.1, 1000);
-    camera.position.z = 14;
-    scene.add(camera);
+    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    camera.position.z = 8; // Move camera back to fit the moon
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -57,11 +51,7 @@ const Moon = () => {
     controls.enableZoom = false;
 
     window.addEventListener("resize", () => {
-      if (window.innerWidth < 800) {
-        w = window.innerWidth;
-      } else {
-        w = window.innerWidth / 2;
-      }
+      w = window.innerWidth;
       h = window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -69,7 +59,7 @@ const Moon = () => {
     });
 
     const loop = () => {
-      mesh.rotation.y -= 0.002;
+      mesh.rotation.y += 0.002;
       controls.update();
       renderer.render(scene, camera);
       requestAnimationFrame(loop);
@@ -77,7 +67,6 @@ const Moon = () => {
     loop();
 
     return () => {
-      // Clean up resources
       scene.clear();
       renderer.dispose();
     };
