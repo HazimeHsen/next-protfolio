@@ -35,8 +35,8 @@ export default function About() {
             delay={0.3}>
             <p>
               In my spare time, I enjoy playing video games, and watching
-              football, especially supporting Real Madrid. I'm always interested
-              in new projects, so feel free to drop me a line.
+              football, especially supporting Real Madrid. I am always
+              interested in new projects, so feel free to drop me a line.
             </p>
           </BoxReveal>
         </div>
