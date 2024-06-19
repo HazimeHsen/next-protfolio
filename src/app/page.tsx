@@ -1,4 +1,3 @@
-import { Container } from "@/components/Container";
 import Moon from "@/components/Moon";
 import Navbar from "@/components/Navbar";
 import About from "@/sections/About";
@@ -11,7 +10,7 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 ">
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 ">
         <Moon />
       </div>
       <>
