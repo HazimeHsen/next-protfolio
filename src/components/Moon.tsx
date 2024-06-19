@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import moonTexture from "../../public/moon-texture.jpg";
 import moonDisplacementMap from "../../public/moon-displacement.jpg";
 
@@ -9,6 +9,8 @@ const Moon = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    if (!canvasRef.current) return;
+
     const scene = new THREE.Scene();
     const geometry = new THREE.SphereGeometry(3, 64, 64);
     const textureLoader = new THREE.TextureLoader();
