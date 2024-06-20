@@ -12,7 +12,7 @@ export default function About() {
         id="about"
         className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8">
         <HeroBg
-          className="absolute inset-0 z-50"
+          className="absolute inset-0"
           quantity={100}
           ease={100}
           size={0.4}

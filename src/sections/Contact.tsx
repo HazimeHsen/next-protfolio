@@ -18,10 +18,10 @@ export default function Contact() {
   };
 
   return (
-    <div className="relative w-full">
+    <div id="contact" className="relative w-full">
       {/* <BackgroundBeams /> */}
       <HeroBg
-        className="absolute inset-0 z-50"
+        className="absolute inset-0"
         quantity={100}
         ease={100}
         size={0.4}

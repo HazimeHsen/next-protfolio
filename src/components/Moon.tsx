@@ -9,7 +9,6 @@ import moonDisplacementMap from "../../public/moon-displacement.jpg";
 
 const Moon = () => {
   const canvasRef = useRef(null);
-  const [inExperienceSection, setInExperienceSection] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -30,6 +29,7 @@ const Moon = () => {
       bumpScale: 0.04,
     });
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.y = -1.6;
     scene.add(mesh);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -51,7 +51,7 @@ const Moon = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    controls.enableDamping = false;
     controls.enablePan = false;
     controls.enableZoom = false;
 
@@ -73,7 +73,7 @@ const Moon = () => {
 
     // GSAP ScrollTrigger for moon position and scale
     gsap.to(mesh.scale, {
-      y: 0.5,
+      y: 0.6,
       scrollTrigger: {
         trigger: "#canvas",
         start: "top top",
@@ -81,7 +81,7 @@ const Moon = () => {
         scrub: true,
       },
       onUpdate: (self) => {
-        const scaleValue = Math.max(1 - window.scrollY / 1000, 0.1);
+        const scaleValue = Math.max(1 - window.scrollY / 1000, 0.6);
         mesh.scale.set(scaleValue, scaleValue, scaleValue);
       },
     });
@@ -108,6 +108,7 @@ const Moon = () => {
 
     const experienceSection = document.getElementById("experience");
     const aboutSection = document.getElementById("about");
+    const contactSection = document.getElementById("contact");
 
     if (experienceSection) {
       console.log("Experience section detected");
@@ -118,28 +119,24 @@ const Moon = () => {
         end: "bottom top",
         onEnter: () => {
           console.log("Entered experience section");
-          setInExperienceSection(true);
           gsap.to(mesh.position, {
             x: 5,
           });
         },
         onLeave: () => {
           console.log("Left experience section");
-          setInExperienceSection(false);
           gsap.to(mesh.position, {
             x: 0,
           });
         },
         onLeaveBack: () => {
           console.log("Left experience section (back)");
-          setInExperienceSection(false);
           gsap.to(mesh.position, {
             x: 0,
           });
         },
         onEnterBack: () => {
           console.log("Left experience section (back)");
-          setInExperienceSection(false);
           gsap.to(mesh.position, {
             x: 5,
           });
@@ -151,30 +148,87 @@ const Moon = () => {
         end: "bottom center",
         onEnter: () => {
           console.log("Entered experience section");
-          setInExperienceSection(true);
           gsap.to(mesh.position, {
             x: -5,
           });
         },
         onLeave: () => {
           console.log("Left experience section");
-          setInExperienceSection(false);
           gsap.to(mesh.position, {
             x: 0,
           });
         },
         onLeaveBack: () => {
           console.log("Left experience section (back)");
-          setInExperienceSection(false);
           gsap.to(mesh.position, {
             x: 0,
           });
         },
         onEnterBack: () => {
           console.log("Left experience section (back)");
-          setInExperienceSection(false);
           gsap.to(mesh.position, {
             x: -5,
+          });
+        },
+      });
+      ScrollTrigger.create({
+        trigger: contactSection,
+        start: "top center",
+        end: "bottom center",
+        onEnter: () => {
+          console.log("Entered experience section");
+          gsap.to(mesh.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+          });
+          gsap.to(mesh.position, {
+            y: -1.6,
+          });
+          gsap.to(light.position, {
+            y: 1000,
+          });
+        },
+        onLeave: () => {
+          console.log("Left experience section");
+          gsap.to(mesh.scale, {
+            x: 0.6,
+            y: 0.6,
+            z: 0.6,
+          });
+          gsap.to(mesh.position, {
+            y: 0,
+          });
+          gsap.to(light.position, {
+            y: 0,
+          });
+        },
+        onLeaveBack: () => {
+          console.log("Left experience section (back)");
+          gsap.to(mesh.scale, {
+            x: 0.6,
+            y: 0.6,
+            z: 0.6,
+          });
+          gsap.to(mesh.position, {
+            y: 0,
+          });
+          gsap.to(light.position, {
+            y: 0,
+          });
+        },
+        onEnterBack: () => {
+          console.log("Left experience section (back)");
+          gsap.to(mesh.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+          });
+          gsap.to(mesh.position, {
+            y: -1.6,
+          });
+          gsap.to(light.position, {
+            y: 1000,
           });
         },
       });
