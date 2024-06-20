@@ -1,5 +1,6 @@
 "use client";
 import { Container } from "@/components/Container";
+import HeroBg from "@/components/HeroBg";
 import { OrbitingCirclesDemo } from "@/components/HeroCircleAnimation";
 import BoxReveal from "@/components/box-reveal";
 import Image from "next/image";
@@ -7,7 +8,17 @@ import Image from "next/image";
 export default function About() {
   return (
     <Container>
-      <div className="h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8">
+      <div
+        id="about"
+        className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8">
+        <HeroBg
+          className="absolute inset-0 z-50"
+          quantity={100}
+          ease={100}
+          size={0.4}
+          staticity={40}
+          color={"#ffffff"}
+        />
         <div className="flex-1 max-w-xl">
           <BoxReveal
             boxColor={"#5046e6"}

@@ -5,6 +5,7 @@ import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
 import { Container } from "@/components/Container";
+import HeroBg from "@/components/HeroBg";
 // import Heading from "@/Components/Heading";
 
 interface Experience {
@@ -77,7 +78,15 @@ const ExperienceSection: React.FC = () => {
   //   </span>
   // </Heading>
   return (
-    <div className="py-10">
+    <div className="py-10 relative">
+      <HeroBg
+        className="absolute inset-0 z-50"
+        quantity={100}
+        ease={100}
+        size={0.4}
+        staticity={40}
+        color={"#ffffff"}
+      />
       <motion.div
         initial="hidden"
         animate={controls}
@@ -144,6 +153,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   return (
     <>
       <div
+        id="experience"
         className={`relative sm:flex items-center text-black px-1 mb-3 ${
           index % 2 === 0 ? "sm:justify-start" : "sm:justify-end"
         }`}>

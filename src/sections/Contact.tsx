@@ -9,6 +9,7 @@ import { HoverBorderGradient } from "@/components/hover-border-gradient";
 import Button from "@/components/Button";
 import { BackgroundBeams } from "@/components/background-beams";
 import { Container } from "@/components/Container";
+import HeroBg from "@/components/HeroBg";
 
 export default function Contact() {
   const handleSubmit = (e: MouseEvent<HTMLButtonElement>) => {
@@ -18,7 +19,15 @@ export default function Contact() {
 
   return (
     <div className="relative w-full">
-      <BackgroundBeams />
+      {/* <BackgroundBeams /> */}
+      <HeroBg
+        className="absolute inset-0 z-50"
+        quantity={100}
+        ease={100}
+        size={0.4}
+        staticity={40}
+        color={"#ffffff"}
+      />
       <Container>
         <div className="relative grid sm:grid-cols-2 items-start gap-10 md:gap-16 p-4 mx-auto py-20 max-w-5xl">
           <div>

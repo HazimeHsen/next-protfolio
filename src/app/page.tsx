@@ -10,14 +10,14 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 ">
+      <div className="fixed inset-0">
         <Moon />
       </div>
-      <>
+      <div className="relative z-10">
         <ExperienceSection />
         <About />
         <Contact />
-      </>
+      </div>
     </>
   );
 }
