@@ -14,9 +14,9 @@ const Hero = () => {
           Hussein Hazime <br /> Full-Stack Developer
         </h1>
         <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center mx-auto">
-          Hey there! I'm Hussein Hazime, a passionate full-stack web developer
-          with expertise in React.js, Node.js, and MongoDB. I enjoy crafting
-          intuitive UI/UX designs and optimizing user experiences.
+          Hey there! I&apos;m Hussein Hazime, a passionate full-stack web
+          developer with expertise in React.js, Node.js, and MongoDB. I enjoy
+          crafting intuitive UI/UX designs and optimizing user experiences.
         </p>
       </div>
       <HeroBg
