@@ -55,7 +55,7 @@ export default function About() {
           <div className="flex-1 flex justify-center lg:justify-end">
             <Image
               quality={100}
-              src={"/me.jpg"}
+              src={"/me.jpg"} // Update with your image path
               alt="Hussein Hazime"
               width={300}
               height={400}

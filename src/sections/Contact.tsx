@@ -1,25 +1,88 @@
 "use client";
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, useState, ChangeEvent } from "react";
 import { Label } from "@/components/Label";
 import { Input } from "@/components/Input";
 import { cn } from "@/utils/cn";
 import { Textarea } from "@/components/Textarea";
-import { FaDiscord, FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import {
+  FaDiscord,
+  FaFacebook,
+  FaInstagram,
+  FaLinkedinIn,
+  FaWhatsapp,
+} from "react-icons/fa";
 import { HoverBorderGradient } from "@/components/hover-border-gradient";
 import Button from "@/components/Button";
 import { BackgroundBeams } from "@/components/background-beams";
 import { Container } from "@/components/Container";
 import HeroBg from "@/components/HeroBg";
+import { sendEmail } from "@/lib/useSendEmail";
 
 export default function Contact() {
-  const handleSubmit = (e: MouseEvent<HTMLButtonElement>) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
+  };
+
+  const validate = () => {
+    let valid = true;
+    let errors = { name: "", email: "", message: "" };
+
+    if (!formData.name) {
+      errors.name = "Name is required";
+      valid = false;
+    }
+
+    if (!formData.email) {
+      errors.email = "Email is required";
+      valid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "Email address is invalid";
+      valid = false;
+    }
+
+    if (!formData.message) {
+      errors.message = "Message is required";
+      valid = false;
+    }
+
+    setErrors(errors);
+    return valid;
+  };
+
+  const handleSubmit = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log("Form submitted");
+    try {
+      if (validate()) {
+        setIsSubmitting(true);
+        await sendEmail(formData);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div id="contact" className="relative w-full">
-      {/* <BackgroundBeams /> */}
       <HeroBg
         className="absolute inset-0"
         quantity={100}
@@ -44,7 +107,7 @@ export default function Contact() {
               <ul className="flex mt-4 space-x-4">
                 <FaInstagram size={24} />
                 <FaFacebook size={24} />
-                <FaWhatsapp size={24} />
+                <FaLinkedinIn size={24} />
                 <FaDiscord size={24} />
               </ul>
             </div>
@@ -53,22 +116,42 @@ export default function Contact() {
           <div className="w-full max-w-md">
             <LabelInputContainer className="mb-4">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="hsen" type="text" />
+              <Input
+                error={errors.name}
+                id="name"
+                placeholder="hsen"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+              />
             </LabelInputContainer>
             <LabelInputContainer className="mb-4">
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" placeholder="hsen@gmail.com" type="email" />
+              <Input
+                error={errors.email}
+                id="email"
+                placeholder="hsen@gmail.com"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
             </LabelInputContainer>
             <LabelInputContainer className="mb-4">
               <Label htmlFor="message">Message</Label>
-              <Textarea id="message" placeholder="Helloooooo" />
+              <Textarea
+                error={errors.message}
+                id="message"
+                placeholder="Helloooooo"
+                value={formData.message}
+                onChange={handleChange}
+              />
             </LabelInputContainer>
             <div className="flex w-full justify-center">
               <Button
                 containerClassName="max-w-full"
                 className="w-full"
                 onClick={(e) => handleSubmit(e)}>
-                Send
+                {isSubmitting ? "Submitting..." : "Send"}
               </Button>
             </div>
           </div>
