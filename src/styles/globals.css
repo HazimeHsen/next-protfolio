@@ -93,3 +93,10 @@ select {
   border-color: transparent rgb(39 39 42 / var(--tw-border-opacity)) transparent
     transparent;
 }
+
+
+@layer utilities {
+  .bg-radial-gradient {
+    background: radial-gradient(circle, transparent 60%, black 150%);
+  }
+}
