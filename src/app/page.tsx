@@ -16,41 +16,54 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Home() {
   const [showContent, setShowContent] = useState(false);
   const [showThreeScene, setShowThreeScene] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleFadeOutComplete = () => {
+    setShowThreeScene(false);
+    setShowContent(true);
+  };
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShowContent(true);
-      setShowThreeScene(false);
-    }, 5000);
+    if (!isLoading) {
+      const timeout = setTimeout(() => {
+        handleFadeOutComplete();
+      }, 4700);
 
-    return () => clearTimeout(timeout);
+      return () => clearTimeout(timeout);
+    }
   }, []);
 
   return (
-    <>
+    <div className="relative overflow-hidden">
       {showThreeScene && (
-        <div className="three-scene fixed inset-0">
-          <ThreeScene />
-        </div>
+        <ThreeScene
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          onFadeOutComplete={handleFadeOutComplete}
+        />
       )}
       <AnimatePresence>
         {showContent && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}>
-            <Navbar />
-            <Hero />
-            <div className="fixed inset-0">
-              <Moon />
-            </div>
-            <ExperienceSection />
-            <About />
-            <Contact />
-          </motion.div>
+          <>
+            <motion.div
+              key="content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="relative z-20">
+              <Navbar />
+              <Hero />
+              <div className="fixed inset-0">
+                <Moon />
+              </div>
+              <About />
+              <ExperienceSection />
+              <Contact />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

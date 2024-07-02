@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -20,6 +20,8 @@ import {
 } from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SpaceShip from "./SpaceShip";
+import LoadingPage from "./LoadingPage/LoadingPage";
 
 const points = [
   [10, 89, 0],
@@ -36,8 +38,21 @@ const points = [
 const path = new CatmullRomCurve3(points);
 path.tension = 0.5;
 
-const ThreeScene = () => {
-  const canvasRef = useRef(null);
+const texts = ["Welcome", "TO", "My", "World"];
+
+interface ThreeSceneProps {
+  onFadeOutComplete: () => void;
+  isLoading: boolean;
+  setIsLoading: (value: boolean) => void;
+}
+
+const ThreeScene: React.FC<ThreeSceneProps> = ({
+  onFadeOutComplete,
+  isLoading,
+  setIsLoading,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [currentText, setCurrentText] = useState(texts[0]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -54,7 +69,7 @@ const ThreeScene = () => {
     renderer.setSize(ww, wh);
 
     const scene = new THREE.Scene();
-    scene.fog = new Fog(0x141414, 0, 100); // Changed fog color to red
+    scene.fog = new Fog(0x141414, 0, 100);
 
     const clock = new Clock();
 
@@ -142,8 +157,8 @@ const ThreeScene = () => {
 
     gsap.to(tubePerc, {
       percent: 0.96,
-      duration: 5, // Adjust duration for the scrolling speed
-      ease: "linear", // Use linear easing for smooth scrolling
+      duration: 5,
+      ease: "linear",
       onUpdate: () => {
         cameraTargetPercentage = tubePerc.percent;
       },
@@ -152,11 +167,16 @@ const ThreeScene = () => {
           autoAlpha: 0,
           duration: 1,
           ease: "power2.inOut",
+          onComplete: onFadeOutComplete,
         });
       },
     });
 
     const render = () => {
+      if (isLoading) {
+        requestAnimationFrame(render);
+        return;
+      }
       currentCameraPercentage = cameraTargetPercentage;
       camera.rotation.y += (cameraRotationProxyX - camera.rotation.y) / 15;
       camera.rotation.x += (cameraRotationProxyY - camera.rotation.x) / 15;
@@ -178,6 +198,26 @@ const ThreeScene = () => {
     };
     window.addEventListener("resize", handleResize);
 
+    const textInterval = setInterval(() => {
+      gsap.to(".fade-text", {
+        autoAlpha: 0,
+        duration: 0.5,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setCurrentText((prevText) => {
+            const currentIndex = texts.indexOf(prevText);
+            const nextIndex = (currentIndex + 1) % texts.length;
+            return texts[nextIndex];
+          });
+          gsap.to(".fade-text", {
+            autoAlpha: 1,
+            duration: 1,
+            ease: "power2.inOut",
+          });
+        },
+      });
+    }, 1000);
+
     return () => {
       window.removeEventListener("resize", handleResize);
       scene.remove(tube);
@@ -185,19 +225,29 @@ const ThreeScene = () => {
       scene.remove(light);
       renderer.dispose();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      clearInterval(textInterval);
     };
-  }, []);
+  }, [onFadeOutComplete, isLoading]);
 
   return (
     <>
-      <canvas
-        ref={canvasRef}
-        className="experience fixed top-0 left-0 w-full h-screen z-10"
-      />
-      <div className="scrollTarget absolute w-24 top-0 z-0"></div>
-      <div className="fixed z-20 top-0 left-0 h-screen w-full pointer-events-none">
-        <div className="absolute top-0 left-0 bottom-0 right-0 pointer-events-none" />
-      </div>
+      {!isLoading && (
+        <>
+          <canvas
+            ref={canvasRef}
+            className="experience fixed top-0 left-0 w-full h-screen z-10"
+          />
+          <div className="scrollTarget absolute w-24 top-0 z-0"></div>
+        </>
+      )}
+      <SpaceShip isLoading={isLoading} setIsLoading={setIsLoading} />
+      {/* <div className="fixed z-20 top-0 left-0 h-screen w-full flex items-center justify-center pointer-events-none">
+        <div className="absolute top-0 left-0 bottom-0 right-0 flex items-center justify-center pointer-events-none">
+          <h1 className="fade-text text-white text-4xl font-bold">
+            {currentText}
+          </h1>
+        </div>
+      </div> */}
     </>
   );
 };
