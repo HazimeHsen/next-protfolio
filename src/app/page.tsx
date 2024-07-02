@@ -57,8 +57,8 @@ export default function Home() {
               <div className="fixed inset-0">
                 <Moon />
               </div>
-              <About />
               <ExperienceSection />
+              <About />
               <Contact />
             </motion.div>
           </>
