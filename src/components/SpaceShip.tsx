@@ -66,7 +66,7 @@ const Modal: React.FC<ModalProps> = ({
       .to(meshRef.current!.rotation, {
         y: THREE.MathUtils.degToRad(12),
         x: THREE.MathUtils.degToRad(2),
-        duration: 0.8,
+        duration: 0.5,
       })
       .to(meshRef.current!.scale, {
         x: 0.01,
