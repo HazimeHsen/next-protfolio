@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
@@ -71,20 +71,20 @@ const Moon = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // GSAP ScrollTrigger for moon position and scale
-    gsap.to(mesh.scale, {
-      y: 0.6,
-      scrollTrigger: {
-        trigger: "#canvas",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-      },
-      onUpdate: (self) => {
-        const scaleValue = Math.max(1 - window.scrollY / 1000, 0.6);
-        mesh.scale.set(scaleValue, scaleValue, scaleValue);
-      },
+    const tl = gsap.timeline({ repeat: 0 });
+
+    tl.to(mesh.scale, {
+      y: 0,
+      x: 0,
+      z: 0,
+    }).to(mesh.scale, {
+      y: 1,
+      x: 1,
+      z: 1,
+      duration: 0.6,
     });
+
+    console.log("================================");
 
     gsap.to(mesh.position, {
       y: 0,
@@ -142,41 +142,43 @@ const Moon = () => {
           });
         },
       });
+
       ScrollTrigger.create({
         trigger: aboutSection,
         start: "top center",
         end: "bottom center",
         onEnter: () => {
-          console.log("Entered experience section");
+          console.log("Entered about section");
           gsap.to(mesh.position, {
             x: -5,
           });
         },
         onLeave: () => {
-          console.log("Left experience section");
+          console.log("Left about section");
           gsap.to(mesh.position, {
             x: 0,
           });
         },
         onLeaveBack: () => {
-          console.log("Left experience section (back)");
+          console.log("Left about section (back)");
           gsap.to(mesh.position, {
             x: 0,
           });
         },
         onEnterBack: () => {
-          console.log("Left experience section (back)");
+          console.log("Entered about section (back)");
           gsap.to(mesh.position, {
             x: -5,
           });
         },
       });
+
       ScrollTrigger.create({
         trigger: contactSection,
         start: "top center",
         end: "bottom center",
         onEnter: () => {
-          console.log("Entered experience section");
+          console.log("Entered contact section");
           gsap.to(mesh.scale, {
             x: 1,
             y: 1,
@@ -190,7 +192,7 @@ const Moon = () => {
           });
         },
         onLeave: () => {
-          console.log("Left experience section");
+          console.log("Left contact section");
           gsap.to(mesh.scale, {
             x: 0.6,
             y: 0.6,
@@ -204,7 +206,7 @@ const Moon = () => {
           });
         },
         onLeaveBack: () => {
-          console.log("Left experience section (back)");
+          console.log("Left contact section (back)");
           gsap.to(mesh.scale, {
             x: 0.6,
             y: 0.6,
@@ -218,7 +220,7 @@ const Moon = () => {
           });
         },
         onEnterBack: () => {
-          console.log("Left experience section (back)");
+          console.log("Entered contact section (back)");
           gsap.to(mesh.scale, {
             x: 1,
             y: 1,
@@ -242,6 +244,7 @@ const Moon = () => {
       scene.remove(light);
       renderer.dispose();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      tl.kill();
     };
   }, []);
 
