@@ -100,3 +100,17 @@ select {
     background: radial-gradient(circle, transparent 60%, black 150%);
   }
 }
+
+.space-ship {
+  opacity: 1;
+  animation: fadeOut 1s forwards; 
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

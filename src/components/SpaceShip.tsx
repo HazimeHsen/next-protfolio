@@ -7,9 +7,14 @@ import gsap from "gsap";
 interface ModalProps {
   isLoading: boolean;
   setIsLoading: (value: boolean) => void;
+  setShowSpaceShip: (value: boolean) => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ isLoading, setIsLoading }) => {
+const Modal: React.FC<ModalProps> = ({
+  isLoading,
+  setIsLoading,
+  setShowSpaceShip,
+}) => {
   const fileUrl = "/3d/space_ship_wg-02/space_ship.gltf";
   const gltf = useLoader(GLTFLoader, fileUrl);
   const meshRef = useRef<THREE.Object3D>(null);
@@ -63,13 +68,17 @@ const Modal: React.FC<ModalProps> = ({ isLoading, setIsLoading }) => {
         x: THREE.MathUtils.degToRad(2),
         duration: 0.8,
       })
+      .to(meshRef.current!.scale, {
+        x: 0.01,
+        y: 0.01,
+        z: 0.01,
+        duration: 0.8,
+        delay: 0.2,
+        onComplete: () => setShowSpaceShip(false),
+      })
       .to(meshRef.current!.rotation, {
         y: 0,
         x: 0,
-        onComplete: () => {
-          console.log("Animation complete");
-          // Perform any actions needed after the animation ends
-        },
       });
 
     return () => {
@@ -83,12 +92,17 @@ const Modal: React.FC<ModalProps> = ({ isLoading, setIsLoading }) => {
 interface SpaceShipProps {
   isLoading: boolean;
   setIsLoading: (value: boolean) => void;
+  setShowSpaceShip: (value: boolean) => void;
 }
 
-const SpaceShip: React.FC<SpaceShipProps> = ({ isLoading, setIsLoading }) => {
+const SpaceShip: React.FC<SpaceShipProps> = ({
+  isLoading,
+  setIsLoading,
+  setShowSpaceShip,
+}) => {
   return (
     <Canvas
-      className="z-[9999]"
+      className="z-[50]"
       style={{
         position: "fixed",
         top: 0,
@@ -98,7 +112,11 @@ const SpaceShip: React.FC<SpaceShipProps> = ({ isLoading, setIsLoading }) => {
       }}>
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
-      <Modal isLoading={isLoading} setIsLoading={setIsLoading} />
+      <Modal
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        setShowSpaceShip={setShowSpaceShip}
+      />
     </Canvas>
   );
 };

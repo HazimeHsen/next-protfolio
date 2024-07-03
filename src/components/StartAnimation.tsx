@@ -53,6 +53,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentText, setCurrentText] = useState(texts[0]);
+  const [showSpaceShip, setShowSpaceShip] = useState(true);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -240,7 +241,13 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
           <div className="scrollTarget absolute w-24 top-0 z-0"></div>
         </>
       )}
-      <SpaceShip isLoading={isLoading} setIsLoading={setIsLoading} />
+      {showSpaceShip && (
+        <SpaceShip
+          setShowSpaceShip={setShowSpaceShip}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+        />
+      )}
       {/* <div className="fixed z-20 top-0 left-0 h-screen w-full flex items-center justify-center pointer-events-none">
         <div className="absolute top-0 left-0 bottom-0 right-0 flex items-center justify-center pointer-events-none">
           <h1 className="fade-text text-white text-4xl font-bold">
