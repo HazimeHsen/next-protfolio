@@ -10,6 +10,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Moon from "@/components/Moon";
 import ThreeScene from "@/components/StartAnimation";
+import Highlights from "@/sections/Highlights";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,6 +58,7 @@ export default function Home() {
               <div className="fixed inset-0">
                 <Moon />
               </div>
+              <Highlights />
               <ExperienceSection />
               <About />
               <Contact />

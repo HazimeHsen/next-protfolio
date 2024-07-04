@@ -84,8 +84,6 @@ const Moon = () => {
       duration: 0.6,
     });
 
-    console.log("================================");
-
     gsap.to(mesh.position, {
       y: 0,
       scrollTrigger: {
@@ -105,138 +103,79 @@ const Moon = () => {
         scrub: true,
       },
     });
-
-    const experienceSection = document.getElementById("experience");
-    const aboutSection = document.getElementById("about");
-    const contactSection = document.getElementById("contact");
-
-    if (experienceSection) {
-      console.log("Experience section detected");
-
-      ScrollTrigger.create({
-        trigger: experienceSection,
-        start: "top bottom",
+    gsap.to(mesh.scale, {
+      y: 0,
+      x: 0,
+      z: 0,
+      scrollTrigger: {
+        trigger: "#canvas",
+        start: "top top",
         end: "bottom top",
-        onEnter: () => {
-          console.log("Entered experience section");
-          gsap.to(mesh.position, {
-            x: 5,
-          });
-        },
-        onLeave: () => {
-          console.log("Left experience section");
-          gsap.to(mesh.position, {
-            x: 0,
-          });
-        },
-        onLeaveBack: () => {
-          console.log("Left experience section (back)");
-          gsap.to(mesh.position, {
-            x: 0,
-          });
-        },
-        onEnterBack: () => {
-          console.log("Left experience section (back)");
-          gsap.to(mesh.position, {
-            x: 5,
-          });
-        },
-      });
+        scrub: true,
+      },
+    });
 
-      ScrollTrigger.create({
-        trigger: aboutSection,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          console.log("Entered about section");
-          gsap.to(mesh.position, {
-            x: -5,
-          });
-        },
-        onLeave: () => {
-          console.log("Left about section");
-          gsap.to(mesh.position, {
-            x: 0,
-          });
-        },
-        onLeaveBack: () => {
-          console.log("Left about section (back)");
-          gsap.to(mesh.position, {
-            x: 0,
-          });
-        },
-        onEnterBack: () => {
-          console.log("Entered about section (back)");
-          gsap.to(mesh.position, {
-            x: -5,
-          });
-        },
-      });
-
-      ScrollTrigger.create({
-        trigger: contactSection,
-        start: "top center",
-        end: "bottom center",
-        onEnter: () => {
-          console.log("Entered contact section");
-          gsap.to(mesh.scale, {
-            x: 1,
-            y: 1,
-            z: 1,
-          });
-          gsap.to(mesh.position, {
-            y: -1.6,
-          });
-          gsap.to(light.position, {
-            y: 1000,
-          });
-        },
-        onLeave: () => {
-          console.log("Left contact section");
-          gsap.to(mesh.scale, {
-            x: 0.6,
-            y: 0.6,
-            z: 0.6,
-          });
-          gsap.to(mesh.position, {
-            y: 0,
-          });
-          gsap.to(light.position, {
-            y: 0,
-          });
-        },
-        onLeaveBack: () => {
-          console.log("Left contact section (back)");
-          gsap.to(mesh.scale, {
-            x: 0.6,
-            y: 0.6,
-            z: 0.6,
-          });
-          gsap.to(mesh.position, {
-            y: 0,
-          });
-          gsap.to(light.position, {
-            y: 0,
-          });
-        },
-        onEnterBack: () => {
-          console.log("Entered contact section (back)");
-          gsap.to(mesh.scale, {
-            x: 1,
-            y: 1,
-            z: 1,
-          });
-          gsap.to(mesh.position, {
-            y: -1.6,
-          });
-          gsap.to(light.position, {
-            y: 1000,
-          });
-        },
-      });
-    } else {
-      console.log("Experience section not found");
-    }
+    ScrollTrigger.create({
+      trigger: "#contact",
+      start: "top center",
+      end: "bottom center",
+      onEnter: () => {
+        console.log("Entered contact section");
+        gsap.to(mesh.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+        });
+        gsap.to(mesh.position, {
+          y: -1.6,
+        });
+        gsap.to(light.position, {
+          y: 1000,
+        });
+      },
+      onLeave: () => {
+        console.log("Left contact section");
+        gsap.to(mesh.scale, {
+          x: 0,
+          y: 0,
+          z: 0,
+        });
+        gsap.to(mesh.position, {
+          y: 0,
+        });
+        gsap.to(light.position, {
+          y: 0,
+        });
+      },
+      onLeaveBack: () => {
+        console.log("Left contact section (back)");
+        gsap.to(mesh.scale, {
+          x: 0,
+          y: 0,
+          z: 0,
+        });
+        gsap.to(mesh.position, {
+          y: 0,
+        });
+        gsap.to(light.position, {
+          y: 0,
+        });
+      },
+      onEnterBack: () => {
+        console.log("Entered contact section (back)");
+        gsap.to(mesh.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+        });
+        gsap.to(mesh.position, {
+          y: -1.6,
+        });
+        gsap.to(light.position, {
+          y: 1000,
+        });
+      },
+    });
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -252,3 +191,95 @@ const Moon = () => {
 };
 
 export default Moon;
+    //   ScrollTrigger.create({
+    //     trigger: experienceSection,
+    //     start: "top bottom",
+    //     end: "bottom top",
+    //     onEnter: () => {
+    //       console.log("Entered experience section");
+    //       gsap.to(mesh.position, {
+    //         x: 5,
+    //       });
+    //     },
+    //     onLeave: () => {
+    //       console.log("Left experience section");
+    //       gsap.to(mesh.position, {
+    //         x: 0,
+    //       });
+    //     },
+    //     onLeaveBack: () => {
+    //       console.log("Left experience section (back)");
+    //       gsap.to(mesh.position, {
+    //         x: 0,
+    //       });
+    //     },
+    //     onEnterBack: () => {
+    //       console.log("Left experience section (back)");
+    //       gsap.to(mesh.position, {
+    //         x: 5,
+    //       });
+    //     },
+    //   });
+
+    // if (experienceSection) {
+    //   console.log("Experience section detected");
+
+    //   ScrollTrigger.create({
+    //     trigger: experienceSection,
+    //     start: "top bottom",
+    //     end: "bottom top",
+    //     onEnter: () => {
+    //       console.log("Entered experience section");
+    //       gsap.to(mesh.position, {
+    //         x: 5,
+    //       });
+    //     },
+    //     onLeave: () => {
+    //       console.log("Left experience section");
+    //       gsap.to(mesh.position, {
+    //         x: 0,
+    //       });
+    //     },
+    //     onLeaveBack: () => {
+    //       console.log("Left experience section (back)");
+    //       gsap.to(mesh.position, {
+    //         x: 0,
+    //       });
+    //     },
+    //     onEnterBack: () => {
+    //       console.log("Left experience section (back)");
+    //       gsap.to(mesh.position, {
+    //         x: 5,
+    //       });
+    //     },
+    //   });
+
+    //   ScrollTrigger.create({
+    //     trigger: aboutSection,
+    //     start: "top center",
+    //     end: "bottom center",
+    //     onEnter: () => {
+    //       console.log("Entered about section");
+    //       gsap.to(mesh.position, {
+    //         x: -5,
+    //       });
+    //     },
+    //     onLeave: () => {
+    //       console.log("Left about section");
+    //       gsap.to(mesh.position, {
+    //         x: 0,
+    //       });
+    //     },
+    //     onLeaveBack: () => {
+    //       console.log("Left about section (back)");
+    //       gsap.to(mesh.position, {
+    //         x: 0,
+    //       });
+    //     },
+    //     onEnterBack: () => {
+    //       console.log("Entered about section (back)");
+    //       gsap.to(mesh.position, {
+    //         x: -5,
+    //       });
+    //     },
+    //   });
