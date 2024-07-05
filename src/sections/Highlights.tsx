@@ -56,7 +56,9 @@ const Highlights: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 px-4 md:grid-cols-3 md:px-32 py-10">
+    <section
+      id="highlights"
+      className="grid grid-cols-1 gap-4 px-4 md:grid-cols-3 md:px-20 lg:px-32 py-10 place-items-center">
       {highlightsData.map((highlight, index) => (
         <HighlightCard
           key={index}
@@ -65,7 +67,7 @@ const Highlights: React.FC = () => {
           delay={index * 0.2}
         />
       ))}
-    </div>
+    </section>
   );
 };
 

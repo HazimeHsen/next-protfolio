@@ -8,7 +8,7 @@ import Image from "next/image";
 export default function About() {
   return (
     <Container>
-      <div
+      <section
         id="about"
         className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8">
         <HeroBg
@@ -63,7 +63,7 @@ export default function About() {
             />
           </div>
         </BoxReveal>
-      </div>
+      </section>
     </Container>
   );
 }

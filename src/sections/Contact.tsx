@@ -82,7 +82,7 @@ export default function Contact() {
   };
 
   return (
-    <div id="contact" className="relative w-full">
+    <section id="contact" className="relative w-full">
       <HeroBg
         className="absolute inset-0"
         quantity={100}
@@ -157,7 +157,7 @@ export default function Contact() {
           </div>
         </div>
       </Container>
-    </div>
+    </section>
   );
 }
 
