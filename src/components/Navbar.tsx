@@ -41,7 +41,7 @@ export const Tabs = ({
 
       sections.forEach((section) => {
         const sectionTop = section.offsetTop;
-        if (window.pageYOffset >= sectionTop - 120) {
+        if (window.pageYOffset >= sectionTop - 150) {
           current = section.getAttribute("id") || "home";
         }
       });

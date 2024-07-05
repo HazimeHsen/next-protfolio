@@ -35,8 +35,8 @@ const HighlightCard: React.FC<HighlightCardProps> = ({ nb, title, delay }) => {
         </p>
       </div>
       <GridPattern
-        numSquares={30}
-        maxOpacity={0.5}
+        numSquares={10}
+        maxOpacity={0.3}
         duration={3}
         repeatDelay={1}
         className={cn(
