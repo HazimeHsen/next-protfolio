@@ -54,6 +54,7 @@ const Moon = () => {
     controls.enableDamping = false;
     controls.enablePan = false;
     controls.enableZoom = false;
+    controls.enableRotate = false; 
 
     const animate = () => {
       mesh.rotation.y += 0.003;

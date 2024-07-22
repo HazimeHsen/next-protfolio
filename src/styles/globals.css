@@ -118,3 +118,13 @@ select {
     opacity: 0;
   }
 }
+
+.laptop{
+  height: 50vh;
+}
+
+@media (min-width: 768px) {
+  .laptop{
+    height: 100vh;
+  }
+}

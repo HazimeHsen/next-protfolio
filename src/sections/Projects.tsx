@@ -27,10 +27,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
   return (
     <div
       ref={ref}
-      className={`flex items-center justify-around h-screen w-screen z-10 px-10 ${
-        isEven ? "flex-row" : "flex-row-reverse"
+      className={`flex flex-col items-center justify-center md:h-screen w-screen z-50 relative ${
+        isEven ? "lg:flex-row" : "lg:flex-row-reverse"
       }`}>
-      <div className="flex flex-col">
+      <div className="flex flex-col px-4 md:px-10 ">
         <div className="mb-4">
           <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
           <p className="text-gray-400">{data.description}</p>
@@ -44,7 +44,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
         </a>
       </div>
 
-      <div className="h-full w-3/5">
+      <div className="md:h-full w-full lg:w-[50%]">
         {data.type === "laptop" ? (
           <Macbook key={`macbook-${index}`} texture={data.textures[0]} />
         ) : (

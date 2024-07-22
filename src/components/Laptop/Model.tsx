@@ -15,8 +15,8 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   const [screenTexture, setScreenTexture] = useState<THREE.Texture | null>(
     null
   );
+  const [scale, setScale] = useState([1, 1, 1]);
 
-  // Reference for the laptop
   const laptopRef = useRef<THREE.Group>(null);
 
   const scene = useMemo(() => {
@@ -90,6 +90,26 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   }, [scene, screenTexture, isLoaded, isInView]);
 
   useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1024) {
+        setScale([1.1, 1.1, 1.1]);
+      } else if (width >= 768) {
+        setScale([1, 1, 1]);
+      } else {
+        setScale([1.19, 1.19, 1.19]);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    handleResize();
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
     if (isInView && isLoaded) {
       const frameMesh = scene.getObjectByName("Frame") as THREE.Mesh;
       const screenMesh = scene.getObjectByName("Screen") as THREE.Mesh;
@@ -122,7 +142,7 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   });
 
   return isLoaded ? (
-    <primitive object={scene} scale={[1.1, 1.1, 1.1]} ref={laptopRef} />
+    <primitive object={scene} scale={scale} ref={laptopRef} />
   ) : null;
 };
 
