@@ -4,8 +4,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import moonTexture from "../../public/moon-texture.jpg";
-import moonDisplacementMap from "../../public/moon-displacement.jpg";
+import moonTexture from "../../public/3d/moon/moon-texture.jpg";
+import moonDisplacementMap from "../../public/3d/moon/moon-displacement.jpg";
 
 const Moon = () => {
   const canvasRef = useRef(null);

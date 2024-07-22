@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/me.jpeg",
+        url: "/personal/me.jpg",
       },
     ],
   },

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/utils/cn";
-import Link from "next/link";
 
 type Tab = {
   name: string;
@@ -41,7 +40,7 @@ export const Tabs = ({
 
       sections.forEach((section) => {
         const sectionTop = section.offsetTop;
-        if (window.pageYOffset >= sectionTop - 150) {
+        if (window.pageYOffset >= sectionTop - 200) {
           current = section.getAttribute("id") || "home";
         }
       });
@@ -109,8 +108,8 @@ export const Tabs = ({
 
 export default function Navbar() {
   const tabs = [
-    { name: "Home", path: "/#" },
     { name: "Highlights", path: "/#highlights" },
+    { name: "Projects", path: "/#projects" },
     { name: "Experience", path: "/#experience" },
     { name: "About", path: "/#about" },
     { name: "Contact", path: "/#contact" },

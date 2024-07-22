@@ -11,6 +11,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Moon from "@/components/Moon";
 import ThreeScene from "@/components/StartAnimation";
 import Highlights from "@/sections/Highlights";
+import Projects from "@/sections/Projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,7 +29,7 @@ export default function Home() {
     if (!isLoading) {
       const timeout = setTimeout(() => {
         handleFadeOutComplete();
-      }, 4700);
+      }, 700);
 
       return () => clearTimeout(timeout);
     }
@@ -59,6 +60,7 @@ export default function Home() {
                 <Moon />
               </div>
               <Highlights />
+              <Projects />
               <ExperienceSection />
               <About />
               <Contact />
