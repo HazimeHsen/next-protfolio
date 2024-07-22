@@ -96,9 +96,9 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
       if (width >= 1024) {
         setScale([1.1, 1.1, 1.1]);
       } else if (width >= 768) {
-        setScale([1, 1, 1]);
+        setScale([1.1, 1.1, 1.1]);
       } else {
-        setScale([1.19, 1.19, 1.19]);
+        setScale([1.1, 1.1, 1.1]);
       }
     };
 
