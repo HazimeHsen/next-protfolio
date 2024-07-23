@@ -25,6 +25,19 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+body {
+  transition-property: opacity, transform, filter, background;
+  transition-timing-function: ease-in-out;
+  transition-duration: 500ms;
+}
+
+.page-transition {
+  opacity: 0;
+  background: black;
+  transform: translateY(40px);
+  filter: blur(12px);
+}
+
 .radial-gradient {
   background: radial-gradient(
       circle at 50% 0%,

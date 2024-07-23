@@ -1,8 +1,9 @@
 import React from "react";
 import { useInView } from "react-intersection-observer";
-import Macbook from "@/components/Laptop/Mackbook";
-import Phone from "@/components/Phone";
-import HeroBg from "@/components/HeroBg";
+import Macbook from "@/components/3d/Laptop/Mackbook";
+import Phone from "@/components/3d/Phone";
+import HeroBg from "@/components/Animations/HeroBg";
+import { TransitionLink } from "@/components/common/TransitionLink";
 
 interface ProjectData {
   title: string;
@@ -35,13 +36,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
           <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
           <p className="text-gray-400">{data.description}</p>
         </div>
-        <a
+        <TransitionLink
           href={data.link}
           className="inline-flex items-center justify-center px-4 py-2 bg-cyan-500 text-black font-semibold rounded hover:bg-cyan-600 transition"
           target="_blank"
           rel="noopener noreferrer">
           View project →
-        </a>
+        </TransitionLink>
       </div>
 
       <div className="md:h-full w-full lg:w-[50%]">
@@ -76,7 +77,7 @@ const Projects: React.FC = () => {
         data={{
           title: "MacBook Pro",
           description: "This is a powerful laptop designed for professionals.",
-          link: "/spr-lesson-builder-dark-large.jpg",
+          link: "/projects",
           type: "laptop",
           textures: ["/projects/mashabeat/mashabeat.jpeg"],
         }}
@@ -87,7 +88,7 @@ const Projects: React.FC = () => {
           title: "iPhone 12",
           description:
             "The latest smartphone from Apple with advanced features.",
-          link: "/spr-lesson-builder-dark-large.jpg",
+          link: "/projects",
           type: "laptop",
           textures: ["/projects/hebbosites/hebbosites.jpeg"],
         }}
@@ -98,7 +99,7 @@ const Projects: React.FC = () => {
           title: "iPhone 12",
           description:
             "The latest smartphone from Apple with advanced features.",
-          link: "/spr-lesson-builder-dark-large.jpg",
+          link: "/projects",
           type: "laptop",
           textures: ["/projects/mibio.bio/mibio.bio.jpeg"],
         }}

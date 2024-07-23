@@ -4,8 +4,7 @@ import { FaBriefcase, FaGraduationCap } from "react-icons/fa";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
-import { Container } from "@/components/Container";
-import HeroBg from "@/components/HeroBg";
+import HeroBg from "@/components/Animations/HeroBg";
 
 interface Experience {
   title: string;
@@ -51,7 +50,7 @@ const ExperienceSection: React.FC = () => {
   const controls = useAnimation();
   const [ref, inView] = useInView({
     triggerOnce: true,
-    threshold: 0.2, // Adjust the threshold as needed
+    threshold: 0.3,
   });
 
   useEffect(() => {

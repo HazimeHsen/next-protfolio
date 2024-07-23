@@ -4,8 +4,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import moonTexture from "../../public/3d/moon/moon-texture.jpg";
-import moonDisplacementMap from "../../public/3d/moon/moon-displacement.jpg";
+import moonTexture from "../../../public/3d/moon/moon-texture.jpg";
+import moonDisplacementMap from "../../../public/3d/moon/moon-displacement.jpg";
 
 const Moon = () => {
   const canvasRef = useRef(null);
@@ -30,6 +30,7 @@ const Moon = () => {
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.y = -1.6;
+    mesh.scale.set(0, 0, 0); // Set the default scale to 0, 0, 0
     scene.add(mesh);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -54,7 +55,7 @@ const Moon = () => {
     controls.enableDamping = false;
     controls.enablePan = false;
     controls.enableZoom = false;
-    controls.enableRotate = false; 
+    controls.enableRotate = false;
 
     const animate = () => {
       mesh.rotation.y += 0.003;
@@ -75,10 +76,6 @@ const Moon = () => {
     const tl = gsap.timeline({ repeat: 0 });
 
     tl.to(mesh.scale, {
-      y: 0,
-      x: 0,
-      z: 0,
-    }).to(mesh.scale, {
       y: 1,
       x: 1,
       z: 1,
@@ -192,95 +189,3 @@ const Moon = () => {
 };
 
 export default Moon;
-    //   ScrollTrigger.create({
-    //     trigger: experienceSection,
-    //     start: "top bottom",
-    //     end: "bottom top",
-    //     onEnter: () => {
-    //       console.log("Entered experience section");
-    //       gsap.to(mesh.position, {
-    //         x: 5,
-    //       });
-    //     },
-    //     onLeave: () => {
-    //       console.log("Left experience section");
-    //       gsap.to(mesh.position, {
-    //         x: 0,
-    //       });
-    //     },
-    //     onLeaveBack: () => {
-    //       console.log("Left experience section (back)");
-    //       gsap.to(mesh.position, {
-    //         x: 0,
-    //       });
-    //     },
-    //     onEnterBack: () => {
-    //       console.log("Left experience section (back)");
-    //       gsap.to(mesh.position, {
-    //         x: 5,
-    //       });
-    //     },
-    //   });
-
-    // if (experienceSection) {
-    //   console.log("Experience section detected");
-
-    //   ScrollTrigger.create({
-    //     trigger: experienceSection,
-    //     start: "top bottom",
-    //     end: "bottom top",
-    //     onEnter: () => {
-    //       console.log("Entered experience section");
-    //       gsap.to(mesh.position, {
-    //         x: 5,
-    //       });
-    //     },
-    //     onLeave: () => {
-    //       console.log("Left experience section");
-    //       gsap.to(mesh.position, {
-    //         x: 0,
-    //       });
-    //     },
-    //     onLeaveBack: () => {
-    //       console.log("Left experience section (back)");
-    //       gsap.to(mesh.position, {
-    //         x: 0,
-    //       });
-    //     },
-    //     onEnterBack: () => {
-    //       console.log("Left experience section (back)");
-    //       gsap.to(mesh.position, {
-    //         x: 5,
-    //       });
-    //     },
-    //   });
-
-    //   ScrollTrigger.create({
-    //     trigger: aboutSection,
-    //     start: "top center",
-    //     end: "bottom center",
-    //     onEnter: () => {
-    //       console.log("Entered about section");
-    //       gsap.to(mesh.position, {
-    //         x: -5,
-    //       });
-    //     },
-    //     onLeave: () => {
-    //       console.log("Left about section");
-    //       gsap.to(mesh.position, {
-    //         x: 0,
-    //       });
-    //     },
-    //     onLeaveBack: () => {
-    //       console.log("Left about section (back)");
-    //       gsap.to(mesh.position, {
-    //         x: 0,
-    //       });
-    //     },
-    //     onEnterBack: () => {
-    //       console.log("Entered about section (back)");
-    //       gsap.to(mesh.position, {
-    //         x: -5,
-    //       });
-    //     },
-    //   });

@@ -21,7 +21,6 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SpaceShip from "./SpaceShip";
-import LoadingPage from "./LoadingPage/LoadingPage";
 
 const points = [
   [10, 89, 0],

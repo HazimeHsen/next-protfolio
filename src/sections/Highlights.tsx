@@ -1,5 +1,5 @@
-import GridPattern from "@/components/AnimatedGridPattern";
-import NumberTicker from "@/components/NumberTicker";
+import GridPattern from "@/components/Animations/AnimatedGridPattern";
+import NumberTicker from "@/components/Animations/NumberTicker";
 import { cn } from "@/utils/cn";
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";

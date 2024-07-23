@@ -1,9 +1,9 @@
 "use client";
 import React, { MouseEvent, useState, ChangeEvent } from "react";
-import { Label } from "@/components/Label";
-import { Input } from "@/components/Input";
+import { Label } from "@/components/common/Label";
+import { Input } from "@/components/common/Input";
 import { cn } from "@/utils/cn";
-import { Textarea } from "@/components/Textarea";
+import { Textarea } from "@/components/common/Textarea";
 import {
   FaDiscord,
   FaFacebook,
@@ -11,11 +11,9 @@ import {
   FaLinkedinIn,
   FaWhatsapp,
 } from "react-icons/fa";
-import { HoverBorderGradient } from "@/components/hover-border-gradient";
-import Button from "@/components/Button";
-import { BackgroundBeams } from "@/components/background-beams";
-import { Container } from "@/components/Container";
-import HeroBg from "@/components/HeroBg";
+import Button from "@/components/common/Button";
+import { Container } from "@/components/common/Container";
+import HeroBg from "@/components/Animations/HeroBg";
 import { sendEmail } from "@/lib/useSendEmail";
 
 export default function Contact() {

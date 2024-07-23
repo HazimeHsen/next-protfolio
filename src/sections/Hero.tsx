@@ -1,6 +1,6 @@
 import React from "react";
-import { Spotlight } from "@/components/Spotlight";
-import HeroBg from "@/components/HeroBg";
+import { Spotlight } from "@/components/Animations/Spotlight";
+import HeroBg from "@/components/Animations/HeroBg";
 
 const Hero = () => {
   return (

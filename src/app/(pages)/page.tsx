@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/common/Navbar";
 import About from "@/sections/About";
 import Contact from "@/sections/Contact";
 import ExperienceSection from "@/sections/Experience";
@@ -8,8 +8,8 @@ import Hero from "@/sections/Hero";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Moon from "@/components/Moon";
-import ThreeScene from "@/components/StartAnimation";
+import Moon from "@/components/3d/Moon";
+import ThreeScene from "@/components/3d/StartAnimation";
 import Highlights from "@/sections/Highlights";
 import Projects from "@/sections/Projects";
 
@@ -20,20 +20,29 @@ export default function Home() {
   const [showThreeScene, setShowThreeScene] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const hasShownAnimation = sessionStorage.getItem("hasShownAnimation");
+    if (hasShownAnimation) {
+      setShowThreeScene(false);
+      setShowContent(true);
+    }
+
+    const handleBeforeUnload = () => {
+      sessionStorage.removeItem("hasShownAnimation");
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   const handleFadeOutComplete = () => {
+    sessionStorage.setItem("hasShownAnimation", "true");
     setShowThreeScene(false);
     setShowContent(true);
   };
-
-  useEffect(() => {
-    if (!isLoading) {
-      const timeout = setTimeout(() => {
-        handleFadeOutComplete();
-      }, 700);
-
-      return () => clearTimeout(timeout);
-    }
-  }, []);
 
   return (
     <div className="relative overflow-hidden">

@@ -1,8 +1,8 @@
 "use client";
-import { Container } from "@/components/Container";
-import HeroBg from "@/components/HeroBg";
+import { Container } from "@/components/common/Container";
+import HeroBg from "@/components/Animations/HeroBg";
 import { OrbitingCirclesDemo } from "@/components/HeroCircleAnimation";
-import BoxReveal from "@/components/box-reveal";
+import BoxReveal from "@/components/Animations/box-reveal";
 import Image from "next/image";
 
 export default function About() {

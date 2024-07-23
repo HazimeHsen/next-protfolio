@@ -1,6 +1,5 @@
 import React from "react";
 import "@/styles/LoadingPage.css";
-import HeroBg from "../HeroBg";
 
 const LoadingPage = () => {
   return (
