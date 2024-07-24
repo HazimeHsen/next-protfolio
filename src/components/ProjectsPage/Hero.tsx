@@ -39,6 +39,20 @@ const Cards = () => {
           />
         ))
       )}
+      {projects.flatMap((project) =>
+        project.images.map((image, index) => (
+          <Card
+            key={`${project.id}-${index}`}
+            containerRef={containerRef}
+            src={image}
+            alt={`${project.title} Image ${index + 1}`}
+            rotate={`${Math.random() * 20 - 10}deg`}
+            top={`${Math.random() * 80}%`}
+            left={`${Math.random() * 80}%`}
+            className="w-36 md:w-56"
+          />
+        ))
+      )}
     </div>
   );
 };

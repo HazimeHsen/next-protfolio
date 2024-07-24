@@ -1,6 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
-import { FaBriefcase, FaGraduationCap } from "react-icons/fa";
+import {
+  FaBriefcase,
+  FaGraduationCap,
+  FaLaptop,
+  FaLaptopCode,
+} from "react-icons/fa";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
@@ -11,33 +16,38 @@ interface Experience {
   subtitle: string;
   date: string;
   icon: JSX.Element;
-  content: string;
 }
 
 const experiences: Experience[] = [
   {
+    title: "Fullstack Developer",
+    subtitle: "Self-employed",
+    date: "May 2023 – Present",
+    icon: <FaBriefcase size={16} />,
+  },
+  {
     title: "Frontend Internship",
     subtitle: "SmartSoft Company",
     date: "Aug 2023 – Oct 2023",
-    icon: <FaBriefcase size={16} />,
-    content:
-      "Developed web applications with React.js. Created a React, Material UI, and AgGrid web application. Collaborated using Git for version control.",
+    icon: <FaLaptopCode size={16} />,
   },
   {
     title: "Fullstack Developer",
     subtitle: "HebboSites Company",
-    date: "Aug 2023 – Oct 2023",
+    date: "May 2023 – May 2024",
     icon: <FaBriefcase size={16} />,
-    content:
-      "Full-stack development with MongoDB, Next.js, React, Tailwind CSS, and Sanity.io. Specialized in responsive UI/UX design. Implemented RESTful APIs for seamless front-end to back-end communication.",
   },
   {
-    title: "Freelancer",
-    subtitle: "Self-employed",
-    date: "May 2023 – Present",
-    icon: <FaBriefcase size={16} />,
-    content:
-      "Full-stack web application development with Next.js, React, Tailwind CSS, and Node.js. Integrated MongoDB and Firebase for robust data management. Specialized in intuitive UI/UX designs.",
+    title: "Computer Science",
+    subtitle: "Islamic University Of Lebanon",
+    date: "Oct 2022 – Feb 2025",
+    icon: <FaGraduationCap size={16} />,
+  },
+  {
+    title: "CCNE",
+    subtitle: "Lebanese University",
+    date: "Oct 2021 – May 2022",
+    icon: <FaGraduationCap size={16} />,
   },
 ];
 

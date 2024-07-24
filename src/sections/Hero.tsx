@@ -21,9 +21,10 @@ const Hero = () => {
         <BlurFade
           delay={0.2}
           className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center mx-auto">
-          Hey there! I&apos;m Hussein Hazime, a passionate full-stack web
-          developer with expertise in React.js, Node.js, and MongoDB. I enjoy
-          crafting intuitive UI/UX designs and optimizing user experiences.
+          Hey there! I&apos;m Hussein Hazime, a creative and dedicated
+          full-stack developer. I specialize in building dynamic and responsive
+          web applications using React.js, Node.js, and MongoDB. Let&apos;s
+          create something amazing together!
         </BlurFade>
       </div>
       <HeroBg

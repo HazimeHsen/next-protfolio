@@ -22,17 +22,17 @@ export default function About() {
         />
         <div className="flex-1 max-w-xl">
           <BoxReveal className="mb-4" duration={0.5} delay={0.1}>
-            <h1 className="text-2xl md:text-4xl font-semibold">Hi there</h1>
+            <h1 className="text-2xl md:text-4xl font-semibold">Hi there!</h1>
           </BoxReveal>
           <BoxReveal
             className="md:text-base text-sm mb-4"
             duration={0.5}
             delay={0.2}>
             <p>
-              I am Hussein Hazime. I live in Lebanon and work as a junior
-              full-stack web developer as a freelancer. My projects include UX
-              design, UI animations, and being comfortable with code allows me
-              to rapidly prototype and validate experiences.
+              I'm Hussein Hazime, a passionate junior full-stack web developer
+              based in Lebanon, working as a freelancer. My expertise lies in UX
+              design, UI animations, and rapid prototyping, allowing me to
+              quickly bring ideas to life and validate user experiences.
             </p>
           </BoxReveal>
           <BoxReveal
@@ -40,9 +40,9 @@ export default function About() {
             duration={0.5}
             delay={0.3}>
             <p>
-              In my spare time, I enjoy playing video games, and watching
-              football, especially supporting Real Madrid. I am always
-              interested in new projects, so feel free to drop me a line.
+              When I'm not coding, you'll find me playing video games or
+              cheering for Real Madrid. I'm always open to new and exciting
+              projects, so don't hesitate to reach out!
             </p>
           </BoxReveal>
         </div>
@@ -58,7 +58,7 @@ export default function About() {
                 collapseDelay={200}
                 collapsed={false}
               />
-              <span className="font-semibold text-primary">About me</span>
+              <span className="font-semibold text-primary">About Me</span>
             </div>
             <BoxReveal duration={0.5} delay={0.4}>
               <Image

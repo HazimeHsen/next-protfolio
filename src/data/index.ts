@@ -15,7 +15,8 @@ export const projects: Project[] = [
   {
     id: "hebboSites",
     title: "HebboSites",
-    description: "Full-stack web application with Next.js and MongoDB.",
+    description:
+      "Developed a full-stack web application for HebboSites, a company specializing in software creation, using Next.js, MongoDB, and Tailwind CSS.",
     subtitle: "May 2023 – Jun 2023",
     technologies: [
       "Next.js",
@@ -43,6 +44,7 @@ export const projects: Project[] = [
     type: "laptop",
     link: "https://mashabeat.com",
   },
+
   {
     id: "3d-bag",
     title: "3d Bag",
@@ -56,7 +58,6 @@ export const projects: Project[] = [
     type: "laptop",
     link: "https://3d-bag-project.vercel.app",
   },
-
   {
     id: "mibio.bio",
     title: "Mibio.bio",
@@ -87,7 +88,7 @@ export const projects: Project[] = [
     id: "asquaredCrypto",
     title: "Asquared Crypto",
     description:
-      "Developed a visually stunning and responsive website using Next.js and Tailwind CSS.",
+      "Developed a visually stunning and responsive website using Next.js and Tailwind CSS for a company specializing in crypto.",
     subtitle: "Jul 2023",
     technologies: ["Next.js", "Tailwind CSS"],
     thirdParties: ["Resend"],

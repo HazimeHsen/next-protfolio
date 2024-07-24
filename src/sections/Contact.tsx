@@ -72,10 +72,10 @@ export default function Contact() {
         await sendEmail(formData);
         setFormData({ name: "", email: "", message: "" });
         setErrors({ name: "", email: "", message: "" });
+        toast.success("Message Sent Successfully", {
+          position: "top-center",
+        });
       }
-      toast.success("Message Sent Successfully", {
-        position: "top-center",
-      });
     } catch (error) {
       console.log(error);
     } finally {

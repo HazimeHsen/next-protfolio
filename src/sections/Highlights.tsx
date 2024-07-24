@@ -51,8 +51,8 @@ const HighlightCard: React.FC<HighlightCardProps> = ({ nb, title, delay }) => {
 const Highlights: React.FC = () => {
   const highlightsData = [
     { nb: 1.5, title: "Years of Experience" },
-    { nb: 25, title: "Projects Completed" },
-    { nb: 15, title: "Happy Clients" },
+    { nb: 10, title: "Projects Completed" },
+    { nb: 9, title: "Happy Clients" },
   ];
 
   return (
