@@ -46,13 +46,13 @@ export const BentoGridItem = ({
         className
       )}>
       <TransitionLink href={link}>
-        <div className="flex flex-1 w-full h-full relative overflow-hidden min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800">
+        <div className="flex flex-1 w-full relative overflow-hidden h-[165px] rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-800">
           <Image
             alt={"image " + title}
             src={images[0]}
             fill
             quality={100}
-            className="transition-transform object-cover duration-300 ease-in-out group-hover:scale-110"
+            className="object-cover"
           />
         </div>
         <div className="group-hover/bento:translate-x-2 transition duration-200">
