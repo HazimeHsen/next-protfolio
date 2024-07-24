@@ -7,6 +7,7 @@ import { Textarea } from "@/components/common/Textarea";
 import {
   FaDiscord,
   FaFacebook,
+  FaGithub,
   FaInstagram,
   FaLinkedinIn,
   FaWhatsapp,
@@ -17,6 +18,7 @@ import HeroBg from "@/components/Animations/HeroBg";
 import { sendEmail } from "@/lib/useSendEmail";
 import BlurFade from "@/components/Animations/BlurFade";
 import { useInView } from "react-intersection-observer";
+import Link from "next/link";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -30,7 +32,7 @@ export default function Contact() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-const { ref, inView } = useInView({ threshold: 0.3 });
+  const { ref, inView } = useInView({ threshold: 0.3 });
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -119,10 +121,15 @@ const { ref, inView } = useInView({ threshold: 0.3 });
                 delay={0.4}
                 inView={inView}
                 className="flex mt-4 space-x-4">
-                <FaInstagram size={24} />
-                <FaFacebook size={24} />
-                <FaLinkedinIn size={24} />
-                <FaDiscord size={24} />
+                <Link href={"https://www.instagram.com/husseinhazime_1"}>
+                  <FaInstagram size={24} />
+                </Link>
+                <Link href={"https://github.com/HazimeHsen"}>
+                  <FaGithub size={24} />
+                </Link>
+                <Link href={"https://www.linkedin.com/in/hussein--hazime/"}>
+                  <FaLinkedinIn size={24} />
+                </Link>
               </BlurFade>
             </div>
           </div>

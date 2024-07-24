@@ -70,7 +70,7 @@ export const Tabs = ({
   return (
     <div
       className={cn(
-        "flex flex-row items-center justify-start [perspective:1000px] relative overflow-auto sm:overflow-visible no-visible-scrollbar max-w-full w-full",
+        "flex flex-row items-center justify-start [perspective:1000px] relative overflow-hidden max-w-full w-full",
         containerClassName
       )}>
       {propTabs.map((tab, idx) => {
@@ -154,7 +154,7 @@ export const Tabs = ({
 export default function Navbar({ animate = false }) {
   const tabs = [
     { name: "Home", path: "/#home" },
-    { name: "Highlights", path: "/#highlights" },
+    // { name: "Highlights", path: "/#highlights" },
     { name: "Projects", path: "/#projects" },
     { name: "Experience", path: "/#experience" },
     { name: "About", path: "/#about" },
@@ -162,7 +162,7 @@ export default function Navbar({ animate = false }) {
   ];
 
   return (
-    <div className="flex flex-col z-[5000] items-start justify-start border-2 border-zinc-800 rounded-full fixed top-4 left-1/2 radial-gradient -translate-x-1/2 p-1">
+    <div className="flex flex-col z-[5000] items-start justify-start overflow-x-hidden border-2 border-zinc-800 rounded-full fixed top-4 left-1/2 radial-gradient -translate-x-1/2 p-1">
       <Tabs tabs={tabs} animate={animate} />
     </div>
   );

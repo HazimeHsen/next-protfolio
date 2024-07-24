@@ -4,6 +4,7 @@ import HeroBg from "@/components/Animations/HeroBg";
 import { OrbitingCirclesDemo } from "@/components/HeroCircleAnimation";
 import BoxReveal from "@/components/Animations/box-reveal";
 import Image from "next/image";
+import Divider from "@/components/common/Divider";
 
 export default function About() {
   return (
@@ -45,18 +46,32 @@ export default function About() {
             </p>
           </BoxReveal>
         </div>
-        <BoxReveal duration={0.5} delay={0.4}>
-          <div className="flex-1 flex justify-center lg:justify-end">
-            <Image
-              quality={100}
-              src={"/personal/me.jpg"}
-              alt="Hussein Hazime"
-              width={300}
-              height={400}
-              className="rounded-lg shadow-lg"
-            />
+        <div className="flex-1 flex justify-center lg:justify-end">
+          <div className="flex items-start flex-col gap-6">
+            <div className="flex items-center gap-4">
+              <Divider
+                className=""
+                lineWidth="80px"
+                lineHeight="2px"
+                notchWidth="60px"
+                notchHeight="8px"
+                collapseDelay={200}
+                collapsed={false}
+              />
+              <span className="font-semibold text-primary">About me</span>
+            </div>
+            <BoxReveal duration={0.5} delay={0.4}>
+              <Image
+                quality={100}
+                src={"/personal/me.jpg"}
+                alt="Hussein Hazime"
+                width={300}
+                height={500}
+                className=""
+              />
+            </BoxReveal>
           </div>
-        </BoxReveal>
+        </div>
       </section>
     </Container>
   );
