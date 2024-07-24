@@ -9,15 +9,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Hsen , Portfolio",
+  title: "Hsen | Portfolio",
   description: "Next js developer",
-  icons: {
-    icon: [
-      {
-        url: "/personal/me.jpg",
-      },
-    ],
-  },
 };
 
 export default function RootLayout({
