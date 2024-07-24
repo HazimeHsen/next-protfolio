@@ -135,8 +135,8 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
     if (isInView && isLoaded && laptopRef.current) {
       const { x, y } = mouse;
       gsap.to(laptopRef.current.rotation, {
-        y: (x * Math.PI) / 20,
-        x: -(y * Math.PI) / 20 + 0.05, // Respect initial rotation
+        y: (x * Math.PI) / 30,
+        x: -(y * Math.PI) / 30 + 0.05,
         duration: 0.2,
         ease: "power2.inOut",
       });

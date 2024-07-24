@@ -29,10 +29,10 @@ export default function About() {
             duration={0.5}
             delay={0.2}>
             <p>
-              I'm Hussein Hazime, a passionate junior full-stack web developer
-              based in Lebanon, working as a freelancer. My expertise lies in UX
-              design, UI animations, and rapid prototyping, allowing me to
-              quickly bring ideas to life and validate user experiences.
+              I{"'"}m Hussein Hazime, a passionate junior full-stack web
+              developer based in Lebanon, working as a freelancer. My expertise
+              lies in UX design, UI animations, and rapid prototyping, allowing
+              me to quickly bring ideas to life and validate user experiences.
             </p>
           </BoxReveal>
           <BoxReveal
@@ -40,9 +40,9 @@ export default function About() {
             duration={0.5}
             delay={0.3}>
             <p>
-              When I'm not coding, you'll find me playing video games or
-              cheering for Real Madrid. I'm always open to new and exciting
-              projects, so don't hesitate to reach out!
+              When I{"'"}m not coding, you{"'"}ll find me playing video games or
+              cheering for Real Madrid. I{"'"}m always open to new and exciting
+              projects, so don{"'"}t hesitate to reach out!
             </p>
           </BoxReveal>
         </div>

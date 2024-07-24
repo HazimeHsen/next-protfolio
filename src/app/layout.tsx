@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "@/styles/globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+});
 
 export const metadata: Metadata = {
-  title: "Hsen | Portfolio",
+  title: "Hsen , Portfolio",
   description: "Next js developer",
   icons: {
     icon: [
@@ -25,7 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={
-          inter.className + " min-h-screen overflow-y-auto overflow-x-hidden"
+          poppins.className + " min-h-screen overflow-y-auto overflow-x-hidden"
         }>
         {children}
       </body>

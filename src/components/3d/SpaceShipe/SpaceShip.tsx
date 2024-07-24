@@ -1,8 +1,9 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, Suspense } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import gsap from "gsap";
+import { Html, useProgress } from "@react-three/drei";
 
 interface ModalProps {
   isLoading: boolean;
@@ -112,13 +113,51 @@ const SpaceShip: React.FC<SpaceShipProps> = ({
       }}>
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
-      <Modal
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-        setShowSpaceShip={setShowSpaceShip}
-      />
+      <Suspense fallback={<Loader />}>
+        <Modal
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          setShowSpaceShip={setShowSpaceShip}
+        />
+      </Suspense>
     </Canvas>
   );
 };
 
 export default SpaceShip;
+
+const Loader: React.FC = () => {
+  const { progress } = useProgress();
+
+  return (
+    <Html center>
+      <ProgressBar bgcolor="#4caf50" completed={progress} />
+    </Html>
+  );
+};
+
+interface ProgressBarProps {
+  bgcolor: string;
+  completed: number;
+}
+
+interface ProgressBarProps {
+  bgcolor: string;
+  completed: number;
+}
+
+const ProgressBar: React.FC<ProgressBarProps> = ({ completed }) => {
+  return (
+    <div className="h-4 w-[250px] bg-gray-700 rounded-full my-12">
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-primary to-blue-500 text-right"
+        style={{
+          width: `${completed}%`,
+        }}>
+        <span className="block text-white text-xs font-bold px-2">{`${completed.toFixed(
+          0
+        )}%`}</span>
+      </div>
+    </div>
+  );
+};
