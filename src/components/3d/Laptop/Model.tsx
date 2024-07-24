@@ -32,6 +32,7 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
 
   useEffect(() => {
     textureLoader.current.load(texture, (loadedTexture) => {
+      loadedTexture.colorSpace = THREE.SRGBColorSpace;
       loadedTexture.flipY = false;
       setScreenTexture(loadedTexture);
       setIsLoaded(true);
@@ -46,9 +47,6 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
             case "Screen":
               child.material = new THREE.MeshBasicMaterial({
                 map: screenTexture,
-                transparent: true,
-                opacity: 1,
-                color: 0xffffff,
               });
               break;
             case "Keyboard":

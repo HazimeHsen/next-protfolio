@@ -16,7 +16,7 @@ const Macbook: React.FC<MacbookProps> = ({ texture }) => {
   return (
     <div ref={ref} className="laptop">
       <Canvas className="z-50">
-        <ambientLight color={0xffffff} intensity={1.2} />
+        <ambientLight color={0xffffff} intensity={1.5} />
         <directionalLight
           position={[-6, 2, 2]}
           color={0xffffff}
