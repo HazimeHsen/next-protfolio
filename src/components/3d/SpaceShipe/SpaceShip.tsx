@@ -67,8 +67,16 @@ const Modal: React.FC<ModalProps> = ({
       .to(meshRef.current!.rotation, {
         y: THREE.MathUtils.degToRad(12),
         x: THREE.MathUtils.degToRad(2),
-        duration: 0.5,
+        duration: 0.7,
+        onComplete: () => {
+          gsap.to(meshRef.current!.rotation, {
+            y: 0,
+            x: 0,
+            duration: 1,
+          });
+        },
       })
+
       .to(meshRef.current!.scale, {
         x: 0.01,
         y: 0.01,
@@ -76,10 +84,6 @@ const Modal: React.FC<ModalProps> = ({
         duration: 0.8,
         delay: 0.2,
         onComplete: () => setShowSpaceShip(false),
-      })
-      .to(meshRef.current!.rotation, {
-        y: 0,
-        x: 0,
       });
 
     return () => {
