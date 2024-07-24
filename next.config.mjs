@@ -1,7 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["s3-us-west-2.amazonaws.com", "via.placeholder.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "s3-us-west-2.amazonaws.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
