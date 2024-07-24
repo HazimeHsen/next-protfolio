@@ -8,6 +8,7 @@ export interface Project {
   duration: string;
   images: string[];
   link: string;
+  type: "phone" | "laptop";
 }
 
 export const projects: Project[] = [
@@ -25,11 +26,9 @@ export const projects: Project[] = [
     ],
     thirdParties: ["Uploadthing", "GitHub"],
     duration: "May 2023 – Jun 2023",
-    images: [
-      "https://via.placeholder.com/800x400?text=HebboSites+1",
-      "https://via.placeholder.com/800x400?text=HebboSites+2",
-    ],
-    link: "https://example.com/hebboSites",
+    images: ["/projects/hebbosites/hebbosites.jpeg"],
+    type: "laptop",
+    link: "https://hebboSites.com",
   },
   {
     id: "mashabeat",
@@ -40,11 +39,9 @@ export const projects: Project[] = [
     technologies: ["Shopify", "Liquid", "Tailwind CSS", "jQuery", "Node.js"],
     thirdParties: ["Sox", "Mashabeat Audio"],
     duration: "Oct 2023 – Mar 2024",
-    images: [
-      "https://via.placeholder.com/800x400?text=Mashabeat+1",
-      "https://via.placeholder.com/800x400?text=Mashabeat+2",
-    ],
-    link: "https://example.com/mashabeat",
+    images: ["/projects/mashabeat/mashabeat.jpeg"],
+    type: "laptop",
+    link: "https://mashabeat.com",
   },
   {
     id: "asquaredCrypto",
@@ -55,10 +52,21 @@ export const projects: Project[] = [
     technologies: ["Next.js", "Tailwind CSS"],
     thirdParties: ["Resend"],
     duration: "May 2023",
-    images: [
-      "https://via.placeholder.com/800x400?text=Asquared+Crypto+1",
-      "https://via.placeholder.com/800x400?text=Asquared+Crypto+2",
-    ],
+    images: ["/projects/mibio.bio/mibio.bio.jpeg"],
+    type: "laptop",
+    link: "https://asquaredCrypto.com",
+  },
+  {
+    id: "asquaredCrypto",
+    title: "Asquared Crypto",
+    description:
+      "Developed a visually stunning and responsive website using Next.js and Tailwind CSS.",
+    subtitle: "May 2023",
+    technologies: ["Next.js", "Tailwind CSS"],
+    thirdParties: ["Resend"],
+    duration: "May 2023",
+    images: ["/projects/mashabeat/mashabeat.jpeg"],
+    type: "laptop",
     link: "https://example.com/asquaredCrypto",
   },
   {
@@ -70,25 +78,8 @@ export const projects: Project[] = [
     technologies: ["Next.js", "Tailwind CSS"],
     thirdParties: ["Resend"],
     duration: "May 2023",
-    images: [
-      "https://via.placeholder.com/800x400?text=Asquared+Crypto+1",
-      "https://via.placeholder.com/800x400?text=Asquared+Crypto+2",
-    ],
-    link: "https://example.com/asquaredCrypto",
-  },
-  {
-    id: "asquaredCrypto",
-    title: "Asquared Crypto",
-    description:
-      "Developed a visually stunning and responsive website using Next.js and Tailwind CSS.",
-    subtitle: "May 2023",
-    technologies: ["Next.js", "Tailwind CSS"],
-    thirdParties: ["Resend"],
-    duration: "May 2023",
-    images: [
-      "https://via.placeholder.com/800x400?text=Asquared+Crypto+1",
-      "https://via.placeholder.com/800x400?text=Asquared+Crypto+2",
-    ],
+    images: ["/projects/mashabeat/mashabeat.jpeg"],
+    type: "laptop",
     link: "https://example.com/asquaredCrypto",
   },
 ];

@@ -15,6 +15,8 @@ import Button from "@/components/common/Button";
 import { Container } from "@/components/common/Container";
 import HeroBg from "@/components/Animations/HeroBg";
 import { sendEmail } from "@/lib/useSendEmail";
+import BlurFade from "@/components/Animations/BlurFade";
+import { useInView } from "react-intersection-observer";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -28,7 +30,7 @@ export default function Contact() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+const { ref, inView } = useInView({ threshold: 0.3 });
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -80,7 +82,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative w-full">
+    <section ref={ref} id="contact" className="relative w-full">
       <HeroBg
         className="absolute inset-0"
         quantity={100}
@@ -92,66 +94,89 @@ export default function Contact() {
       <Container>
         <div className="relative grid sm:grid-cols-2 items-start gap-10 md:gap-16 p-4 mx-auto py-20 max-w-5xl">
           <div>
-            <h2 className="font-extrabold text-2xl md:text-3xl text-neutral-200">
+            <BlurFade
+              delay={0.1}
+              inView={inView}
+              className="font-extrabold text-2xl md:text-3xl text-neutral-200">
               Get in Touch
-            </h2>
-            <p className="text-sm max-w-sm mt-4 text-neutral-300">
+            </BlurFade>
+            <BlurFade
+              delay={0.2}
+              inView={inView}
+              className="text-sm max-w-sm mt-4 text-neutral-300">
               Have a question or want to work together? Fill out the form below
               and I will get back to you as soon as possible.
-            </p>
+            </BlurFade>
             <div className="mt-5 md:mt-10">
-              <h2 className="text-neutral-200 text-base font-bold">Socials</h2>
+              <BlurFade
+                delay={0.3}
+                inView={inView}
+                className="text-neutral-200 text-base font-bold">
+                Socials
+              </BlurFade>
 
-              <ul className="flex mt-4 space-x-4">
+              <BlurFade
+                delay={0.4}
+                inView={inView}
+                className="flex mt-4 space-x-4">
                 <FaInstagram size={24} />
                 <FaFacebook size={24} />
                 <FaLinkedinIn size={24} />
                 <FaDiscord size={24} />
-              </ul>
+              </BlurFade>
             </div>
           </div>
 
           <div className="w-full max-w-md">
-            <LabelInputContainer className="mb-4">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                error={errors.name}
-                id="name"
-                placeholder="hsen"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </LabelInputContainer>
-            <LabelInputContainer className="mb-4">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                error={errors.email}
-                id="email"
-                placeholder="hsen@gmail.com"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </LabelInputContainer>
-            <LabelInputContainer className="mb-4">
-              <Label htmlFor="message">Message</Label>
-              <Textarea
-                error={errors.message}
-                id="message"
-                placeholder="Helloooooo"
-                value={formData.message}
-                onChange={handleChange}
-              />
-            </LabelInputContainer>
-            <div className="flex w-full justify-center">
+            <BlurFade delay={0.5} inView={inView}>
+              <LabelInputContainer className="mb-4">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  error={errors.name}
+                  id="name"
+                  placeholder="hsen"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </LabelInputContainer>
+            </BlurFade>
+            <BlurFade delay={0.6} inView={inView}>
+              <LabelInputContainer className="mb-4">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  error={errors.email}
+                  id="email"
+                  placeholder="hsen@gmail.com"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </LabelInputContainer>
+            </BlurFade>
+            <BlurFade delay={0.7} inView={inView}>
+              <LabelInputContainer className="mb-4">
+                <Label htmlFor="message">Message</Label>
+                <Textarea
+                  error={errors.message}
+                  id="message"
+                  placeholder="Helloooooo"
+                  value={formData.message}
+                  onChange={handleChange}
+                />
+              </LabelInputContainer>
+            </BlurFade>
+            <BlurFade
+              delay={0.8}
+              inView={inView}
+              className="flex w-full justify-center">
               <Button
                 containerClassName="max-w-full"
                 className="w-full"
                 onClick={(e) => handleSubmit(e)}>
                 {isSubmitting ? "Submitting..." : "Send"}
               </Button>
-            </div>
+            </BlurFade>
           </div>
         </div>
       </Container>

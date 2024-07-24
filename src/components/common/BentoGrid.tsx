@@ -40,7 +40,7 @@ export const BentoGridItem = ({
 }) => {
   return (
     <BlurFade
-      index={index}
+      delay={index * 0.1}
       className={cn(
         "row-span-1 rounded-xl group/bento shadow-none p-4 radial-gradient relative border-white/[0.2] border-2 justify-between flex flex-col space-y-4",
         className

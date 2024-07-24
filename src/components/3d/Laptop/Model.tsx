@@ -16,11 +16,15 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
     null
   );
   const [scale, setScale] = useState([1, 1, 1]);
-
   const laptopRef = useRef<THREE.Group>(null);
 
   const scene = useMemo(() => {
     const clone = originalScene.clone();
+    clone.rotateX(0.05);
+    const keyboardMesh = clone.getObjectByName("Keyboard") as THREE.Mesh;
+    if (keyboardMesh) {
+      keyboardMesh.scale.set(1, 1, 0.85);
+    }
     return clone;
   }, [originalScene]);
 
@@ -78,14 +82,14 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
         });
       }
 
-      scene.castShadow = true;
-      scene.receiveShadow = true;
-      scene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
+      // scene.castShadow = true;
+      // scene.receiveShadow = true;
+      // scene.traverse((child) => {
+      //   if (child instanceof THREE.Mesh) {
+      //     child.castShadow = true;
+      //     child.receiveShadow = true;
+      //   }
+      // });
     }
   }, [scene, screenTexture, isLoaded, isInView]);
 
@@ -94,11 +98,11 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
       const width = window.innerWidth;
 
       if (width >= 1024) {
-        setScale([1.1, 1.1, 1.1]);
+        setScale([1.25, 1.25, 1.25]);
       } else if (width >= 768) {
         setScale([1.1, 1.1, 1.1]);
       } else {
-        setScale([1, 1, 1]);
+        setScale([1.28, 1.28, 1.28]);
       }
     };
 
@@ -133,8 +137,8 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
     if (isInView && isLoaded && laptopRef.current) {
       const { x, y } = mouse;
       gsap.to(laptopRef.current.rotation, {
-        y: (x * Math.PI) / 50,
-        x: -(y * Math.PI) / 50,
+        y: (x * Math.PI) / 20,
+        x: -(y * Math.PI) / 20 + 0.05, // Respect initial rotation
         duration: 0.2,
         ease: "power2.inOut",
       });

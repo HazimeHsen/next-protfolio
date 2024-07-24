@@ -1,6 +1,7 @@
 import React from "react";
 import { Spotlight } from "@/components/Animations/Spotlight";
 import HeroBg from "@/components/Animations/HeroBg";
+import BlurFade from "@/components/Animations/BlurFade";
 
 const Hero = () => {
   return (
@@ -12,14 +13,18 @@ const Hero = () => {
         fill="white"
       />
       <div className="p-4 max-w-7xl mx-auto relative z-10 w-full pt-20 md:pt-0">
-        <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
+        <BlurFade
+          delay={0}
+          className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
           Hussein Hazime <br /> Full-Stack Developer
-        </h1>
-        <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center mx-auto">
+        </BlurFade>
+        <BlurFade
+          delay={0.2}
+          className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center mx-auto">
           Hey there! I&apos;m Hussein Hazime, a passionate full-stack web
           developer with expertise in React.js, Node.js, and MongoDB. I enjoy
           crafting intuitive UI/UX designs and optimizing user experiences.
-        </p>
+        </BlurFade>
       </div>
       <HeroBg
         className="absolute inset-0 z-50"

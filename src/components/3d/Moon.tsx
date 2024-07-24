@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
@@ -9,6 +9,7 @@ import moonDisplacementMap from "../../../public/3d/moon/moon-displacement.jpg";
 
 const Moon = () => {
   const canvasRef = useRef(null);
+  const [isFirstEnter, setIsFirstEnter] = useState(true);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -30,7 +31,7 @@ const Moon = () => {
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.y = -1.6;
-    mesh.scale.set(0, 0, 0); // Set the default scale to 0, 0, 0
+    mesh.scale.set(0, 0, 0);
     scene.add(mesh);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -79,37 +80,61 @@ const Moon = () => {
       y: 1,
       x: 1,
       z: 1,
-      duration: 0.6,
+      duration: 0.8,
+      delay: 1.4,
     });
 
-    gsap.to(mesh.position, {
-      y: 0,
-      scrollTrigger: {
-        trigger: "#canvas",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
+    ScrollTrigger.create({
+      trigger: "#home",
+      start: "bottom bottom",
+      end: "bottom center",
+      onEnter: () => {
+        gsap.to(mesh.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.8,
+        });
+        gsap.to(mesh.position, {
+          y: -1.6,
+          duration: 0.8,
+        });
+        gsap.to(light.position, {
+          y: 1000,
+          duration: 0.8,
+        });
       },
-    });
-
-    gsap.to(light.position, {
-      y: 0,
-      scrollTrigger: {
-        trigger: "#canvas",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
+      onLeave: () => {
+        gsap.to(mesh.scale, {
+          x: 0,
+          y: 0,
+          z: 0,
+          duration: 0.8,
+        });
+        gsap.to(mesh.position, {
+          y: 0,
+          duration: 0.8,
+        });
+        gsap.to(light.position, {
+          y: 0,
+          duration: 0.8,
+        });
       },
-    });
-    gsap.to(mesh.scale, {
-      y: 0,
-      x: 0,
-      z: 0,
-      scrollTrigger: {
-        trigger: "#canvas",
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
+      onEnterBack: () => {
+        gsap.to(mesh.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.8,
+        });
+        gsap.to(mesh.position, {
+          y: -1.6,
+          duration: 0.8,
+        });
+        gsap.to(light.position, {
+          y: 1000,
+          duration: 0.8,
+        });
       },
     });
 
@@ -118,60 +143,137 @@ const Moon = () => {
       start: "top center",
       end: "bottom center",
       onEnter: () => {
-        console.log("Entered contact section");
-        gsap.to(mesh.scale, {
-          x: 1,
-          y: 1,
-          z: 1,
-        });
-        gsap.to(mesh.position, {
-          y: -1.6,
-        });
-        gsap.to(light.position, {
-          y: 1000,
-        });
+        if (isFirstEnter) {
+          gsap
+            .timeline()
+            .to(mesh.scale, {
+              x: 1,
+              y: 1,
+              z: 1,
+              delay: 1,
+              duration: 0.8,
+            })
+            .to(
+              mesh.position,
+              {
+                y: -1.6,
+                duration: 0.8,
+              },
+              "-=0.8"
+            )
+            .to(
+              light.position,
+              {
+                y: 1000,
+                duration: 0.8,
+              },
+              "-=0.8"
+            );
+          setIsFirstEnter(false);
+        } else {
+          gsap
+            .timeline()
+            .to(mesh.scale, {
+              x: 1,
+              y: 1,
+              z: 1,
+              duration: 0.8,
+            })
+            .to(
+              mesh.position,
+              {
+                y: -1.6,
+                duration: 0.8,
+              },
+              "-=0.8"
+            )
+            .to(
+              light.position,
+              {
+                y: 1000,
+                duration: 0.8,
+              },
+              "-=0.8"
+            );
+        }
       },
       onLeave: () => {
-        console.log("Left contact section");
-        gsap.to(mesh.scale, {
-          x: 0,
-          y: 0,
-          z: 0,
-        });
-        gsap.to(mesh.position, {
-          y: 0,
-        });
-        gsap.to(light.position, {
-          y: 0,
-        });
+        gsap
+          .timeline()
+          .to(mesh.scale, {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.8,
+          })
+          .to(
+            mesh.position,
+            {
+              y: 0,
+              duration: 0.8,
+            },
+            "-=0.8"
+          )
+          .to(
+            light.position,
+            {
+              y: 0,
+              duration: 0.8,
+            },
+            "-=0.8"
+          );
       },
       onLeaveBack: () => {
-        console.log("Left contact section (back)");
-        gsap.to(mesh.scale, {
-          x: 0,
-          y: 0,
-          z: 0,
-        });
-        gsap.to(mesh.position, {
-          y: 0,
-        });
-        gsap.to(light.position, {
-          y: 0,
-        });
+        gsap
+          .timeline()
+          .to(mesh.scale, {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.8,
+          })
+          .to(
+            mesh.position,
+            {
+              y: 0,
+              duration: 0.8,
+            },
+            "-=0.8"
+          )
+          .to(
+            light.position,
+            {
+              y: 0,
+              duration: 0.8,
+            },
+            "-=0.8"
+          );
       },
       onEnterBack: () => {
-        console.log("Entered contact section (back)");
-        gsap.to(mesh.scale, {
-          x: 1,
-          y: 1,
-          z: 1,
-        });
-        gsap.to(mesh.position, {
-          y: -1.6,
-        });
-        gsap.to(light.position, {
-          y: 1000,
-        });
+        gsap
+          .timeline()
+          .to(mesh.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            duration: 0.8,
+          })
+          .to(
+            mesh.position,
+            {
+              y: -1.6,
+              duration: 0.8,
+            },
+            "-=0.8"
+          )
+          .to(
+            light.position,
+            {
+              y: 1000,
+              duration: 0.8,
+            },
+            "-=0.8"
+          );
       },
     });
 
@@ -183,7 +285,7 @@ const Moon = () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       tl.kill();
     };
-  }, []);
+  }, [isFirstEnter]);
 
   return <canvas ref={canvasRef} id="canvas" />;
 };

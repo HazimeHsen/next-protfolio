@@ -6,7 +6,6 @@ interface BlurFadeProps {
   children: React.ReactNode;
   className?: string;
   duration?: number;
-  index: number;
   delay?: number;
   yOffset?: number;
   inView?: boolean;
@@ -16,7 +15,6 @@ interface BlurFadeProps {
 
 export default function BlurFade({
   children,
-  index,
   className,
   duration = 0.4,
   delay = 0,
@@ -38,7 +36,7 @@ export default function BlurFade({
       animate={isInView ? "visible" : "hidden"}
       variants={combinedVariants}
       transition={{
-        delay: delay + index * 0.1,
+        delay: delay,
         duration,
         ease: "linear",
       }}

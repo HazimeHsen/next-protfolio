@@ -4,7 +4,10 @@ import Macbook from "@/components/3d/Laptop/Mackbook";
 import Phone from "@/components/3d/Phone";
 import HeroBg from "@/components/Animations/HeroBg";
 import { TransitionLink } from "@/components/common/TransitionLink";
-
+import { projects } from "@/data";
+import { FaArrowRight } from "react-icons/fa";
+import Divider from "@/components/common/Divider";
+import { motion } from "framer-motion";
 interface ProjectData {
   title: string;
   description: string;
@@ -28,26 +31,46 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
   return (
     <div
       ref={ref}
-      className={`flex flex-col items-center justify-center md:h-screen w-screen z-50 relative ${
-        isEven ? "lg:flex-row" : "lg:flex-row-reverse"
+      className={`flex flex-col-reverse items-center justify-center md:h-[100vh] w-screen z-50 relative ${
+        isEven ? "md:flex-row" : "md:flex-row-reverse"
       }`}>
-      <div className="flex flex-col px-4 md:px-10 ">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
-          <p className="text-gray-400">{data.description}</p>
+      <div className="flex flex-col gap-4 px-4 md:px-10 md:min-w-[300px]">
+        <div className="space-y-5">
+          <div className="flex items-center gap-4">
+            <Divider
+              className=""
+              lineWidth="80px"
+              lineHeight="2px"
+              notchWidth="60px"
+              notchHeight="8px"
+              collapseDelay={200}
+              collapsed={false}
+            />
+            <div className="text-primary font-semibold">0{index + 1}</div>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">{data.title}</h2>
+          <p className="text-gray-300">{data.description}</p>
         </div>
-        <TransitionLink
-          href={data.link}
-          className="inline-flex items-center justify-center px-4 py-2 bg-cyan-500 text-black font-semibold rounded hover:bg-cyan-600 transition"
-          target="_blank"
-          rel="noopener noreferrer">
-          View project →
-        </TransitionLink>
+        <motion.div
+          className="w-fit link px-4 py-2 bg-primary text-black font-semibold hover:bg-primary/80 transition"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.95 }}>
+          <TransitionLink
+            href={"/projects"}
+            target="_blank"
+            className="flex items-center gap-2 justify-center "
+            rel="noopener noreferrer">
+            <span>View More</span>
+            <FaArrowRight />
+          </TransitionLink>
+        </motion.div>
       </div>
 
-      <div className="md:h-full w-full lg:w-[50%]">
+      <div className="md:h-full w-full md:w-[60%]">
         {data.type === "laptop" ? (
-          <Macbook key={`macbook-${index}`} texture={data.textures[0]} />
+          <div>
+            <Macbook texture={data.textures[0]} />
+          </div>
         ) : (
           <Phone
             key={`phone-${index}`}
@@ -75,33 +98,25 @@ const Projects: React.FC = () => {
       <ProjectCard
         index={0}
         data={{
-          title: "MacBook Pro",
-          description: "This is a powerful laptop designed for professionals.",
-          link: "/projects",
+          ...projects[0],
           type: "laptop",
-          textures: ["/projects/mashabeat/mashabeat.jpeg"],
+          textures: [...projects[0].images],
         }}
       />
       <ProjectCard
         index={1}
         data={{
-          title: "iPhone 12",
-          description:
-            "The latest smartphone from Apple with advanced features.",
-          link: "/projects",
+          ...projects[1],
           type: "laptop",
-          textures: ["/projects/hebbosites/hebbosites.jpeg"],
+          textures: [...projects[1].images],
         }}
       />
       <ProjectCard
         index={2}
         data={{
-          title: "iPhone 12",
-          description:
-            "The latest smartphone from Apple with advanced features.",
-          link: "/projects",
+          ...projects[2],
           type: "laptop",
-          textures: ["/projects/mibio.bio/mibio.bio.jpeg"],
+          textures: [...projects[2].images],
         }}
       />
     </section>

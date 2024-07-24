@@ -20,15 +20,10 @@ export default function About() {
           color={"#ffffff"}
         />
         <div className="flex-1 max-w-xl">
-          <BoxReveal
-            boxColor={"#5046e6"}
-            className="mb-4"
-            duration={0.5}
-            delay={0.1}>
+          <BoxReveal className="mb-4" duration={0.5} delay={0.1}>
             <h1 className="text-2xl md:text-4xl font-semibold">Hi there</h1>
           </BoxReveal>
           <BoxReveal
-            boxColor={"#5046e6"}
             className="md:text-base text-sm mb-4"
             duration={0.5}
             delay={0.2}>
@@ -41,7 +36,6 @@ export default function About() {
           </BoxReveal>
           <BoxReveal
             className="md:text-base text-sm mb-4"
-            boxColor={"#5046e6"}
             duration={0.5}
             delay={0.3}>
             <p>
@@ -51,7 +45,7 @@ export default function About() {
             </p>
           </BoxReveal>
         </div>
-        <BoxReveal boxColor={"#5046e6"} duration={0.5} delay={0.4}>
+        <BoxReveal duration={0.5} delay={0.4}>
           <div className="flex-1 flex justify-center lg:justify-end">
             <Image
               quality={100}
