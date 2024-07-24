@@ -112,7 +112,7 @@ const SpaceShip: React.FC<SpaceShipProps> = ({
         height: "100vh",
       }}>
       <ambientLight intensity={1} />
-      <pointLight position={[0, 0, 20]} />
+      <pointLight position={[0, 0, 0]} />
       <Suspense fallback={<Loader />}>
         <Modal
           isLoading={isLoading}
