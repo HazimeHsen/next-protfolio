@@ -4,14 +4,7 @@ import { Label } from "@/components/common/Label";
 import { Input } from "@/components/common/Input";
 import { cn } from "@/utils/cn";
 import { Textarea } from "@/components/common/Textarea";
-import {
-  FaDiscord,
-  FaFacebook,
-  FaGithub,
-  FaInstagram,
-  FaLinkedinIn,
-  FaWhatsapp,
-} from "react-icons/fa";
+import { FaInstagram, FaGithub, FaLinkedinIn } from "react-icons/fa";
 import Button from "@/components/common/Button";
 import { Container } from "@/components/common/Container";
 import HeroBg from "@/components/Animations/HeroBg";
@@ -19,6 +12,7 @@ import { sendEmail } from "@/lib/useSendEmail";
 import BlurFade from "@/components/Animations/BlurFade";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -33,6 +27,7 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { ref, inView } = useInView({ threshold: 0.3 });
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -75,7 +70,12 @@ export default function Contact() {
       if (validate()) {
         setIsSubmitting(true);
         await sendEmail(formData);
+        setFormData({ name: "", email: "", message: "" });
+        setErrors({ name: "", email: "", message: "" });
       }
+      toast.success("Message Sent Successfully", {
+        position: "top-center",
+      });
     } catch (error) {
       console.log(error);
     } finally {
@@ -85,6 +85,7 @@ export default function Contact() {
 
   return (
     <section ref={ref} id="contact" className="relative w-full">
+      <Toaster />
       <HeroBg
         className="absolute inset-0"
         quantity={100}

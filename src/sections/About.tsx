@@ -67,7 +67,7 @@ export default function About() {
                 alt="Hussein Hazime"
                 width={300}
                 height={500}
-                className=""
+                className="md:w-[300px] w-full"
               />
             </BoxReveal>
           </div>

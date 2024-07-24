@@ -159,7 +159,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             index % 2 === 0 && !isMobile ? slideAnimation : slideFromRight
           }
           transition={{ duration: 0.5 }}
-          className="radial-gradient border-zinc-800 border-2 sm:w-64 ml-16 sm:ml-0 md:w-80 px-4 py-2 rounded-md relative">
+          className="radial-gradient border-zinc-800 border-2 sm:w-64 ml-10 md:mr-0 mr-3 sm:ml-0 md:w-80 px-4 py-2 rounded-md relative">
           {index % 2 === 0 ? (
             <div className="absolute right-[100%] sm:!-right-4 top-1/2 -translate-y-1/2">
               <div className="arrow-left"></div>
