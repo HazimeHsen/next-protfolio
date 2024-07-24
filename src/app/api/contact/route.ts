@@ -10,17 +10,19 @@ interface ContactFormData {
 export async function POST(request: NextRequest) {
   try {
     const data: ContactFormData = await request.json();
+    const myEmail = process.env.MY_EMAIL || "";
+    const myPassword = process.env.MY_PASSWORD || "";
 
     const transport = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.MY_EMAIL,
-        pass: process.env.MY_PASSWORD,
+        user: myEmail,
+        pass: myPassword,
       },
     });
 
     const toThem = {
-      from: process.env.MY_EMAIL,
+      from: myEmail,
       to: data.email,
       subject: "Portfolio Contact",
       text: "Hey, this is Hsen. Thanks for messaging me. I will get back to you as soon as possible!",
@@ -29,9 +31,9 @@ export async function POST(request: NextRequest) {
     const toMe = {
       from: {
         name: "Contact form",
-        address: process.env.MY_EMAIL,
+        address: myEmail,
       },
-      to: process.env.MY_EMAIL,
+      to: myEmail,
       subject: "Portfolio Contact",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
