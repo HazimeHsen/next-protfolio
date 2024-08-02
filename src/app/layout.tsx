@@ -10,7 +10,8 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Hsen | Portfolio",
-  description: "Next js developer",
+  description:
+    "Welcome to Hsen's portfolio, showcasing my skills and projects as a Next.js developer. Explore my work in web development, including modern technologies like Tailwind CSS, Three.js, and React Three Fiber. Discover my journey, experience, and the innovative solutions I've crafted.",
 };
 
 export default function RootLayout({
