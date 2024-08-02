@@ -2,9 +2,9 @@ import { HTMLAttributes } from "react";
 import { motion, Transition } from "framer-motion";
 import { cn } from "@/utils/cn";
 
-// Define props interface including custom props
 interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
   containerClassName?: string;
+  disabled?: boolean;
 }
 
 const animationProps: {
@@ -37,19 +37,25 @@ const Button = ({
   containerClassName,
   className,
   children,
+  disabled,
   ...props
 }: ButtonProps) => {
   return (
     <motion.div
       initial={animationProps.initial}
       animate={animationProps.animate}
-      whileTap={animationProps.whileTap}
+      whileTap={!disabled ? animationProps.whileTap : undefined}
       transition={animationProps.transition}
       className={cn(
         "px-6 py-2 rounded-full w-full max-w-[200px] relative radial-gradient",
         containerClassName
       )}>
-      <button className={cn("w-full", className)} {...props}>
+      <button
+        className={cn("w-full", className, {
+          "opacity-50 cursor-not-allowed": disabled,
+        })}
+        disabled={disabled}
+        {...props}>
         <span className="text-neutral-100 tracking-wide font-light h-full w-full block relative linear-mask">
           {children}
         </span>

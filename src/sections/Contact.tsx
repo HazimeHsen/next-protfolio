@@ -179,6 +179,7 @@ export default function Contact() {
               inView={inView}
               className="flex w-full justify-center">
               <Button
+                disabled={isSubmitting}
                 containerClassName="max-w-full"
                 className="w-full"
                 onClick={(e) => handleSubmit(e)}>
