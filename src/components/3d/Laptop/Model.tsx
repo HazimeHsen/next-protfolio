@@ -89,13 +89,13 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
 
       if (width >= 1024) {
         setScale([1.25, 1.25, 1.25]);
-        setPosition([0, 0, 0]); // Default position for large screens
+        setPosition([0, 0, 0]); 
       } else if (width >= 768) {
         setScale([1.1, 1.1, 1.1]);
-        setPosition([0, 0, 0]); // Adjust position for medium screens
+        setPosition([0, 0, 0]); 
       } else {
         setScale([1.28, 1.28, 1.28]);
-        setPosition([0, -0.5, 0]); // Move to bottom for small screens
+        setPosition([0, -0.5, 0]);
       }
     };
 
