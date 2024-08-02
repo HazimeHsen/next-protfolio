@@ -182,7 +182,7 @@ export default function Contact() {
                 containerClassName="max-w-full"
                 className="w-full"
                 onClick={(e) => handleSubmit(e)}>
-                {isSubmitting ? "Submitting..." : "Send"}
+                {isSubmitting ? "Sending..." : "Send"}
               </Button>
             </BlurFade>
           </div>
