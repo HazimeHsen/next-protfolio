@@ -7,7 +7,7 @@ import { Textarea } from "@/components/common/Textarea";
 import { FaInstagram, FaGithub, FaLinkedinIn } from "react-icons/fa";
 import Button from "@/components/common/Button";
 import { Container } from "@/components/common/Container";
-import HeroBg from "@/components/Animations/HeroBg";
+import StarBg from "@/components/Animations/StarBg";
 import { sendEmail } from "@/lib/useSendEmail";
 import BlurFade from "@/components/Animations/BlurFade";
 import { useInView } from "react-intersection-observer";
@@ -86,7 +86,7 @@ export default function Contact() {
   return (
     <section ref={ref} id="contact" className="relative w-full">
       <Toaster />
-      <HeroBg
+      <StarBg
         className="absolute inset-0"
         quantity={100}
         ease={100}

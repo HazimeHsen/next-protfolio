@@ -2,7 +2,7 @@ import React from "react";
 import { useInView } from "react-intersection-observer";
 import Macbook from "@/components/3d/Laptop/Mackbook";
 import Phone from "@/components/3d/Phone";
-import HeroBg from "@/components/Animations/HeroBg";
+import StarBg from "@/components/Animations/StarBg";
 import { TransitionLink } from "@/components/common/TransitionLink";
 import { projects } from "@/data";
 import { FaArrowRight } from "react-icons/fa";
@@ -96,7 +96,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
 const Projects: React.FC = () => {
   return (
     <section id="projects" className="py-10 relative z-50">
-      <HeroBg
+      <StarBg
         className="absolute inset-0 z-0"
         quantity={100}
         ease={100}

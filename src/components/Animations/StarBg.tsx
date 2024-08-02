@@ -48,7 +48,7 @@ function hexToRgb(hex: string): number[] {
   return [red, green, blue];
 }
 
-const HeroBg: React.FC<ParticlesProps> = ({
+const StarBg: React.FC<ParticlesProps> = ({
   className = "",
   quantity = 100,
   staticity = 50,
@@ -267,4 +267,4 @@ const HeroBg: React.FC<ParticlesProps> = ({
   );
 };
 
-export default HeroBg;
+export default StarBg;

@@ -1,6 +1,6 @@
 "use client";
 import { Container } from "@/components/common/Container";
-import HeroBg from "@/components/Animations/HeroBg";
+import StarBg from "@/components/Animations/StarBg";
 import { OrbitingCirclesDemo } from "@/components/HeroCircleAnimation";
 import BoxReveal from "@/components/Animations/box-reveal";
 import Image from "next/image";
@@ -12,7 +12,7 @@ export default function About() {
       <section
         id="about"
         className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8">
-        <HeroBg
+        <StarBg
           className="absolute inset-0"
           quantity={100}
           ease={100}
@@ -21,6 +21,20 @@ export default function About() {
           color={"#ffffff"}
         />
         <div className="flex-1 max-w-xl">
+          <BoxReveal>
+            <div className="flex items-center gap-4 mb-5">
+              <Divider
+                className=""
+                lineWidth="80px"
+                lineHeight="2px"
+                notchWidth="60px"
+                notchHeight="8px"
+                collapseDelay={200}
+                collapsed={false}
+              />
+              <span className="font-semibold text-primary">About Me</span>
+            </div>
+          </BoxReveal>
           <BoxReveal className="mb-4" duration={0.5} delay={0.1}>
             <h1 className="text-2xl md:text-4xl font-semibold">Hi there!</h1>
           </BoxReveal>
@@ -48,18 +62,6 @@ export default function About() {
         </div>
         <div className="flex-1 flex justify-center lg:justify-end">
           <div className="flex items-start flex-col gap-6">
-            <div className="flex items-center gap-4">
-              <Divider
-                className=""
-                lineWidth="80px"
-                lineHeight="2px"
-                notchWidth="60px"
-                notchHeight="8px"
-                collapseDelay={200}
-                collapsed={false}
-              />
-              <span className="font-semibold text-primary">About Me</span>
-            </div>
             <BoxReveal duration={0.5} delay={0.4}>
               <Image
                 quality={100}

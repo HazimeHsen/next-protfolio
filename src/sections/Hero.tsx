@@ -1,6 +1,6 @@
 import React from "react";
 import { Spotlight } from "@/components/Animations/Spotlight";
-import HeroBg from "@/components/Animations/HeroBg";
+import StarBg from "@/components/Animations/StarBg";
 import BlurFade from "@/components/Animations/BlurFade";
 
 const Hero = () => {
@@ -27,7 +27,7 @@ const Hero = () => {
           create something amazing together!
         </BlurFade>
       </div>
-      <HeroBg
+      <StarBg
         className="absolute inset-0 z-50"
         quantity={160}
         ease={100}

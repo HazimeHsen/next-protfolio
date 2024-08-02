@@ -16,6 +16,7 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
     null
   );
   const [scale, setScale] = useState([1, 1, 1]);
+  const [position, setPosition] = useState([0, 0, 0]); // State to manage position
   const laptopRef = useRef<THREE.Group>(null);
 
   const scene = useMemo(() => {
@@ -79,15 +80,6 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
           }
         });
       }
-
-      // scene.castShadow = true;
-      // scene.receiveShadow = true;
-      // scene.traverse((child) => {
-      //   if (child instanceof THREE.Mesh) {
-      //     child.castShadow = true;
-      //     child.receiveShadow = true;
-      //   }
-      // });
     }
   }, [scene, screenTexture, isLoaded, isInView]);
 
@@ -97,15 +89,17 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
 
       if (width >= 1024) {
         setScale([1.25, 1.25, 1.25]);
+        setPosition([0, 0, 0]); // Default position for large screens
       } else if (width >= 768) {
         setScale([1.1, 1.1, 1.1]);
+        setPosition([0, 0, 0]); // Adjust position for medium screens
       } else {
         setScale([1.28, 1.28, 1.28]);
+        setPosition([0, -0.5, 0]); // Move to bottom for small screens
       }
     };
 
     window.addEventListener("resize", handleResize);
-
     handleResize();
 
     return () => window.removeEventListener("resize", handleResize);
@@ -144,7 +138,12 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   });
 
   return isLoaded ? (
-    <primitive object={scene} scale={scale} ref={laptopRef} />
+    <primitive
+      object={scene}
+      scale={scale}
+      position={position}
+      ref={laptopRef}
+    />
   ) : null;
 };
 

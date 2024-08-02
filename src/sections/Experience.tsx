@@ -9,7 +9,7 @@ import {
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
-import HeroBg from "@/components/Animations/HeroBg";
+import StarBg from "@/components/Animations/StarBg";
 
 interface Experience {
   title: string;
@@ -76,7 +76,7 @@ const ExperienceSection: React.FC = () => {
 
   return (
     <section id="experience" className="py-10 relative">
-      <HeroBg
+      <StarBg
         className="absolute inset-0"
         quantity={100}
         ease={100}
