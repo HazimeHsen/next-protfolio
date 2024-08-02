@@ -17,7 +17,21 @@ const Modal: React.FC<ModalProps> = ({
   setShowSpaceShip,
 }) => {
   const fileUrl = "/3d/space_ship_wg-02/space_ship.gltf";
-  const gltf = useLoader(GLTFLoader, fileUrl);
+  const gltf = useLoader(GLTFLoader, fileUrl, (loader) => {
+    loader.manager.onStart = (url, itemsLoaded, itemsTotal) => {
+      console.log(
+        `Started loading file: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} files.`
+      );
+    };
+    loader.manager.onLoad = () => {
+      console.log("All items loaded.");
+      setIsLoading(false);
+    };
+    loader.manager.onError = (url) => {
+      console.error(`There was an error loading ${url}`);
+      setIsLoading(false);
+    };
+  });
   const meshRef = useRef<THREE.Object3D>(null);
 
   const bbox = new THREE.Box3().setFromObject(gltf.scene);
@@ -76,7 +90,6 @@ const Modal: React.FC<ModalProps> = ({
           });
         },
       })
-
       .to(meshRef.current!.scale, {
         x: 0.01,
         y: 0.01,
@@ -133,8 +146,7 @@ export default SpaceShip;
 const Loader: React.FC = () => {
   return (
     <Html center>
-      <div className="loader"></div>{" "}
+      <div className="loader"></div>
     </Html>
   );
 };
-
