@@ -6,7 +6,7 @@ import ProjectsGrid from "@/components/ProjectsPage/ProjectsGrid";
 
 const ProjectsPage = () => {
   return (
-    <section id="projects">
+    <section>
       <ProjectsHero />
       <ProjectsGrid />
     </section>
