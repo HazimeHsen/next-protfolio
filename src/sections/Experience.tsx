@@ -1,55 +1,18 @@
 "use client";
 import React, { useEffect } from "react";
-import {
-  FaBriefcase,
-  FaGraduationCap,
-  FaLaptop,
-  FaLaptopCode,
-} from "react-icons/fa";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
 import StarBg from "@/components/Animations/StarBg";
+import { experiencesContent } from "@/data";
+import { IconType } from "react-icons";
 
 interface Experience {
   title: string;
   subtitle: string;
   date: string;
-  icon: JSX.Element;
+  icon: IconType;
 }
-
-const experiences: Experience[] = [
-  {
-    title: "Fullstack Developer",
-    subtitle: "Self-employed",
-    date: "May 2023 – Present",
-    icon: <FaBriefcase size={16} />,
-  },
-  {
-    title: "Frontend Internship",
-    subtitle: "SmartSoft Company",
-    date: "Aug 2023 – Oct 2023",
-    icon: <FaLaptopCode size={16} />,
-  },
-  {
-    title: "Fullstack Developer",
-    subtitle: "HebboSites Company",
-    date: "May 2023 – May 2024",
-    icon: <FaBriefcase size={16} />,
-  },
-  {
-    title: "Computer Science",
-    subtitle: "Islamic University Of Lebanon",
-    date: "Oct 2022 – Feb 2025",
-    icon: <FaGraduationCap size={16} />,
-  },
-  {
-    title: "CCNE",
-    subtitle: "Lebanese University",
-    date: "Oct 2021 – May 2022",
-    icon: <FaGraduationCap size={16} />,
-  },
-];
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -88,15 +51,17 @@ const ExperienceSection: React.FC = () => {
         initial="hidden"
         animate={controls}
         variants={lineAnimation}
-        transition={{ duration: 0.3 }}></motion.div>
+        transition={{ duration: 0.3 }}
+      ></motion.div>
       <motion.div
         ref={ref}
         initial="hidden"
         animate={controls}
         variants={lineAnimation}
         transition={{ duration: 0.3 }}
-        className="pl-7 sm:pl-0 before:ml-7 overflow-hidden space-y-14 w-full lg:max-w-3xl sm:mx-auto py-20 relative before:absolute before:inset-0 sm:before:mx-auto before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-        {experiences.map((experience, index) => (
+        className="pl-7 sm:pl-0 before:ml-7 overflow-hidden space-y-14 w-full lg:max-w-3xl sm:mx-auto py-20 relative before:absolute before:inset-0 sm:before:mx-auto before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent"
+      >
+        {experiencesContent.map((experience, index) => (
           <ExperienceCard key={index} experience={experience} index={index} />
         ))}
       </motion.div>
@@ -152,15 +117,17 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
       <div
         className={`relative sm:flex items-center text-black px-1 mb-3 ${
           index % 2 === 0 ? "sm:justify-start" : "sm:justify-end"
-        }`}>
+        }`}
+      >
         <motion.div
           ref={ref}
           initial="hidden"
           animate={controls}
           variants={iconAnimation}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex absolute sm:mx-auto -ml-5 inset-0 ring-4 ring-zinc-800 my-auto items-center transform -translate-y-1/2 justify-center w-10 h-10 rounded-full bg-slate-200 text-black shadow md:order-1">
-          {experience.icon}
+          className="flex absolute sm:mx-auto -ml-5 inset-0 ring-4 ring-zinc-800 my-auto items-center transform -translate-y-1/2 justify-center w-10 h-10 rounded-full bg-slate-200 text-black shadow md:order-1"
+        >
+          <experience.icon />
         </motion.div>
         <motion.div
           initial="hidden"
@@ -169,7 +136,8 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             index % 2 === 0 && !isMobile ? slideAnimation : slideFromRight
           }
           transition={{ duration: 0.5 }}
-          className="radial-gradient border-zinc-800 border-2 sm:w-64 ml-10 md:mr-0 mr-3 sm:ml-0 md:w-80 px-4 py-2 rounded-md relative">
+          className="radial-gradient border-zinc-800 border-2 sm:w-64 ml-10 md:mr-0 mr-3 sm:ml-0 md:w-80 px-4 py-2 rounded-md relative"
+        >
           {index % 2 === 0 ? (
             <div className="absolute right-[100%] sm:!-right-4 top-1/2 -translate-y-1/2">
               <div className="arrow-left"></div>
