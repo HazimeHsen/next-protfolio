@@ -1,17 +1,18 @@
 "use client";
 import { Container } from "@/components/common/Container";
 import StarBg from "@/components/Animations/StarBg";
-import { OrbitingCirclesDemo } from "@/components/HeroCircleAnimation";
 import BoxReveal from "@/components/Animations/box-reveal";
 import Image from "next/image";
 import Divider from "@/components/common/Divider";
+import { aboutContent } from "@/data";
 
 export default function About() {
   return (
     <Container>
       <section
         id="about"
-        className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8">
+        className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8"
+      >
         <StarBg
           className="absolute inset-0"
           quantity={100}
@@ -32,32 +33,29 @@ export default function About() {
                 collapseDelay={200}
                 collapsed={false}
               />
-              <span className="font-semibold text-primary">About Me</span>
+              <span className="font-semibold text-primary">
+                {aboutContent.sectionTitle}
+              </span>
             </div>
           </BoxReveal>
           <BoxReveal className="mb-4" duration={0.5} delay={0.1}>
-            <h1 className="text-2xl md:text-4xl font-semibold">Hi there!</h1>
+            <h1 className="text-2xl md:text-4xl font-semibold">
+              {aboutContent.title}
+            </h1>
           </BoxReveal>
           <BoxReveal
             className="md:text-base text-sm mb-4"
             duration={0.5}
-            delay={0.2}>
-            <p>
-              I{"'"}m Hussein Hazime, a passionate junior full-stack web
-              developer based in Lebanon, working as a freelancer. My expertise
-              lies in UX design, UI animations, and rapid prototyping, allowing
-              me to quickly bring ideas to life and validate user experiences.
-            </p>
+            delay={0.2}
+          >
+            <p>{aboutContent.intro}</p>
           </BoxReveal>
           <BoxReveal
             className="md:text-base text-sm mb-4"
             duration={0.5}
-            delay={0.3}>
-            <p>
-              When I{"'"}m not coding, you{"'"}ll find me playing video games or
-              cheering for Real Madrid. I{"'"}m always open to new and exciting
-              projects, so don{"'"}t hesitate to reach out!
-            </p>
+            delay={0.3}
+          >
+            <p>{aboutContent.hobbies}</p>
           </BoxReveal>
         </div>
         <div className="flex-1 flex justify-center lg:justify-end">

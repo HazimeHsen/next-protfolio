@@ -8,7 +8,6 @@ import { projects } from "@/data";
 import { FaArrowRight } from "react-icons/fa";
 import Divider from "@/components/common/Divider";
 import { motion } from "framer-motion";
-import { Container } from "@/components/common/Container";
 import BlurFade from "@/components/Animations/BlurFade";
 
 interface ProjectData {

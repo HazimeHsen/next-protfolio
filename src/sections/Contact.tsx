@@ -4,7 +4,6 @@ import { Label } from "@/components/common/Label";
 import { Input } from "@/components/common/Input";
 import { cn } from "@/utils/cn";
 import { Textarea } from "@/components/common/Textarea";
-import { FaInstagram, FaGithub, FaLinkedinIn } from "react-icons/fa";
 import Button from "@/components/common/Button";
 import { Container } from "@/components/common/Container";
 import StarBg from "@/components/Animations/StarBg";
@@ -13,6 +12,7 @@ import BlurFade from "@/components/Animations/BlurFade";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
+import { contactContent } from "@/data";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -72,7 +72,7 @@ export default function Contact() {
         await sendEmail(formData);
         setFormData({ name: "", email: "", message: "" });
         setErrors({ name: "", email: "", message: "" });
-        toast.success("Message Sent Successfully", {
+        toast.success(contactContent.successMessage, {
           position: "top-center",
         });
       }
@@ -101,36 +101,31 @@ export default function Contact() {
               delay={0.1}
               inView={inView}
               className="font-extrabold text-2xl md:text-3xl text-neutral-200">
-              Get in Touch
+              {contactContent.title}
             </BlurFade>
             <BlurFade
               delay={0.2}
               inView={inView}
               className="text-sm max-w-sm mt-4 text-neutral-300">
-              Have a question or want to work together? Fill out the form below
-              and I will get back to you as soon as possible.
+              {contactContent.description}
             </BlurFade>
             <div className="mt-5 md:mt-10">
               <BlurFade
                 delay={0.3}
                 inView={inView}
                 className="text-neutral-200 text-base font-bold">
-                Socials
+                {contactContent.socialsTitle}
               </BlurFade>
 
               <BlurFade
                 delay={0.4}
                 inView={inView}
                 className="flex mt-4 space-x-4">
-                <Link href={"https://www.instagram.com/husseinhazime_1"}>
-                  <FaInstagram size={24} />
-                </Link>
-                <Link href={"https://github.com/HazimeHsen"}>
-                  <FaGithub size={24} />
-                </Link>
-                <Link href={"https://www.linkedin.com/in/hussein--hazime/"}>
-                  <FaLinkedinIn size={24} />
-                </Link>
+                {contactContent.socialLinks.map((link, index) => (
+                  <Link href={link.href} key={index}>
+                    <link.icon size={24} />
+                  </Link>
+                ))}
               </BlurFade>
             </div>
           </div>
@@ -142,7 +137,7 @@ export default function Contact() {
                 <Input
                   error={errors.name}
                   id="name"
-                  placeholder="hsen"
+                  placeholder={contactContent.placeholders.name}
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
@@ -155,7 +150,7 @@ export default function Contact() {
                 <Input
                   error={errors.email}
                   id="email"
-                  placeholder="hsen@gmail.com"
+                  placeholder={contactContent.placeholders.email}
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
@@ -168,7 +163,7 @@ export default function Contact() {
                 <Textarea
                   error={errors.message}
                   id="message"
-                  placeholder="Helloooooo"
+                  placeholder={contactContent.placeholders.message}
                   value={formData.message}
                   onChange={handleChange}
                 />
@@ -183,7 +178,9 @@ export default function Contact() {
                 containerClassName="max-w-full"
                 className="w-full"
                 onClick={(e) => handleSubmit(e)}>
-                {isSubmitting ? "Sending..." : "Send"}
+                {isSubmitting
+                  ? contactContent.submittingButton
+                  : contactContent.submitButton}
               </Button>
             </BlurFade>
           </div>

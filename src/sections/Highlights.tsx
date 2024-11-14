@@ -3,6 +3,7 @@ import NumberTicker from "@/components/Animations/NumberTicker";
 import { cn } from "@/utils/cn";
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { highlightsContent } from "@/data";
 
 interface HighlightCardProps {
   nb: number;
@@ -49,17 +50,12 @@ const HighlightCard: React.FC<HighlightCardProps> = ({ nb, title, delay }) => {
 };
 
 const Highlights: React.FC = () => {
-  const highlightsData = [
-    { nb: 1.5, title: "Years of Experience" },
-    { nb: 10, title: "Projects Completed" },
-    { nb: 9, title: "Happy Clients" },
-  ];
 
   return (
     <section
       id="highlights"
       className="grid grid-cols-1 gap-4 px-4 md:grid-cols-3 md:px-20 lg:px-32 py-10 place-items-center">
-      {highlightsData.map((highlight, index) => (
+      {highlightsContent.map((highlight, index) => (
         <HighlightCard
           key={index}
           nb={highlight.nb}
