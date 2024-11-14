@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+  --radial-gradient-background: 250, 250, 250;
+  --solid-color-background: 15, 15, 15;
+  --overlay-color: 255, 255, 255;
+}
+
+html{
+  scroll-behavior: smooth;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+body {
+  transition-property: opacity, transform, filter, background;
+  transition-timing-function: ease-in-out;
+  transition-duration: 500ms;
+}
+
+.page-transition {
+  opacity: 0;
+  background: black;
+  transform: translateY(40px);
+  filter: blur(12px);
+}
+
+.radial-gradient {
+  background: radial-gradient(
+      circle at 50% 0%,
+      rgba(var(--radial-gradient-background), 0.05) 0%,
+      transparent 60%
+    )
+    #000;
+}
+
+input,
+textarea,
+select {
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(var(--radial-gradient-background), 0.05) 0%,
+    transparent 60%
+  );
+}
+
+.linear-mask {
+  mask-image: linear-gradient(
+    -75deg,
+    white calc(var(--x) + 20%),
+    transparent calc(var(--x) + 30%),
+    white calc(var(--x) + 100%)
+  );
+  -webkit-mask-image: linear-gradient(
+    -75deg,
+    white calc(var(--x) + 20%),
+    transparent calc(var(--x) + 30%),
+    white calc(var(--x) + 100%)
+  );
+}
+
+.linear-overlay {
+  background-image: linear-gradient(
+    -75deg,
+    rgba(var(--overlay-color), 0.1) calc(var(--x) + 20%),
+    rgba(var(--overlay-color), 0.5) calc(var(--x) + 25%),
+    rgba(var(--overlay-color), 0.1) calc(var(--x) + 100%)
+  );
+  mask: linear-gradient(black, black) content-box, linear-gradient(black, black);
+  -webkit-mask: linear-gradient(black, black) content-box,
+    linear-gradient(black, black);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+.arrow-left,
+.arrow-right {
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.arrow-left {
+  border-width: 7px 0 7px 15px;
+  border-color: transparent transparent transparent
+    rgb(39 39 42 / var(--tw-border-opacity));
+
+  @media (max-width: 640px) {
+    border-width: 7px 15px 7px 0;
+    border-color: transparent rgb(39 39 42 / var(--tw-border-opacity))
+      transparent transparent;
+  }
+}
+
+.arrow-right {
+  border-width: 7px 15px 7px 0;
+  border-color: transparent rgb(39 39 42 / var(--tw-border-opacity)) transparent
+    transparent;
+}
+
+
+@layer utilities {
+  .bg-radial-gradient {
+    background: radial-gradient(circle, transparent 60%, black 150%);
+  }
+}
+
+.space-ship {
+  opacity: 1;
+  animation: fadeOut 1s forwards; 
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.laptop{
+  height: 50vh;
+}
+
+@media (min-width: 768px) {
+  .laptop{
+    height: 100vh;
+  }
+}
+
+.link{
+  -webkit-clip-path: polygon(0 0,0 0,100% 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 100%);
+  clip-path: polygon(0 0,0 0,100% 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 100%);
+}
+
+::selection {
+  background-color: var(--primary);
+  color: #000000;
+}
+
+::-moz-selection {
+  background-color: var(--primary);
+  color: #000000;
+}
+
+
+.loader {
+  display: block;
+  --height-of-loader: 4px;
+  --loader-color: var(--primary);
+  width: 130px;
+  height: var(--height-of-loader);
+  border-radius: 30px;
+  background-color: rgba(65, 65, 65);
+  position: relative;
+}
+
+.loader::before {
+  content: "";
+  position: absolute;
+  background: var(--loader-color);
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  border-radius: 30px;
+  animation: moving 1s ease-in-out infinite;
+  ;
+}
+
+@keyframes moving {
+  50% {
+    width: 100%;
+  }
+
+  100% {
+    width: 0;
+    right: 0;
+    left: unset;
+  }
+}
