@@ -11,7 +11,7 @@ export default function About() {
     <Container>
       <section
         id="about"
-        className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8"
+        className="relative h-full w-full py-10 max-w-5xl mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between overflow-hidden space-y-8 lg:space-y-0 lg:space-x-8"
       >
         <StarBg
           className="absolute inset-0"
@@ -21,7 +21,7 @@ export default function About() {
           staticity={40}
           color={"#ffffff"}
         />
-        <div className="flex-1 max-w-xl">
+        <div className="w-full flex-1 max-w-xl">
           <BoxReveal>
             <div className="flex items-center gap-4 mb-5">
               <Divider
@@ -58,7 +58,7 @@ export default function About() {
             <p>{aboutContent.hobbies}</p>
           </BoxReveal>
         </div>
-        <div className="flex-1 flex justify-center lg:justify-end">
+        <div className="w-full flex-1 flex justify-center lg:justify-end">
           <div className="w-full lg:max-w-[340px] flex items-start flex-col gap-6">
             <BoxReveal width="100%" className="w-full" duration={0.5} delay={0.4}>
               <Image
