@@ -66,7 +66,7 @@ export default function HomePageClient() {
             className="relative z-20">
             <Navbar />
             <Hero />
-            <div className="fixed inset-0">
+            <div className="pointer-events-none fixed inset-0 z-0">
               <Moon />
             </div>
             <div className="">
