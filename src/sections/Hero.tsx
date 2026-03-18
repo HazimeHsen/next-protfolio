@@ -7,7 +7,7 @@ import BlurFade from "@/components/Animations/BlurFade";
 import { heroContent } from "@/data";
 import { TransitionLink } from "@/components/common/TransitionLink";
 import Button from "@/components/common/Button";
-import { FaArrowRight } from "react-icons/fa";
+import { FaChevronRight } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const Hero = () => {
@@ -40,30 +40,32 @@ const Hero = () => {
         </BlurFade>
         <BlurFade
           delay={0.35}
-          className="mt-8 mb-1 flex flex-wrap items-center justify-center gap-3"
+          className="mt-8 mb-1 flex w-full flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <motion.div
-            className="w-fit bg-primary text-black font-semibold hover:bg-primary/80 transition"
+            className="w-full sm:w-[260px] bg-primary text-black font-semibold hover:bg-primary/80 transition"
             whileTap={{ scale: 0.95 }}
             style={{ clipPath: cutClipPath, WebkitClipPath: cutClipPath }}
           >
             <TransitionLink
               href="/projects"
-              className="inline-flex items-center gap-2 px-6 py-3"
+              className="inline-flex w-full items-center justify-center gap-2 px-6 py-3"
             >
               Check All Projects
-              <FaArrowRight className="text-sm" />
+              <FaChevronRight className="text-xs" />
             </TransitionLink>
           </motion.div>
           <Button
             variant="solid"
             tone="outline"
-            containerClassName="w-fit px-6 py-3"
+            containerClassName="w-full sm:w-fit px-6 py-3"
+            className="w-full justify-center"
             onClick={() =>
               window.open("/Hussein_hazime.pdf", "_blank", "noopener,noreferrer")
             }
           >
             Open CV
+            <FaChevronRight className="text-xs" />
           </Button>
         </BlurFade>
         <p className="sr-only">

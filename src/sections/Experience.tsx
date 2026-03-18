@@ -60,7 +60,7 @@ const ExperienceSection: React.FC = () => {
         animate={controls}
         variants={lineAnimation}
         transition={{ duration: 0.3 }}
-        className="pl-7 sm:pl-0 before:ml-7 overflow-hidden space-y-14 w-full lg:max-w-3xl sm:mx-auto py-20 relative before:absolute before:inset-0 sm:before:mx-auto before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent"
+        className="pl-7 sm:pl-0 before:ml-7 overflow-hidden space-y-8 w-full lg:max-w-5xl sm:mx-auto py-14 relative before:absolute before:inset-0 sm:before:mx-auto before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent"
       >
         {experiencesContent.map((experience, index) => (
           <ExperienceCard key={index} experience={experience} index={index} />
@@ -137,7 +137,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             index % 2 === 0 && !isMobile ? slideAnimation : slideFromRight
           }
           transition={{ duration: 0.5 }}
-          className="radial-gradient border-zinc-800 border-2 sm:w-64 ml-10 md:mr-0 mr-3 sm:ml-0 md:w-80 px-4 py-2 rounded-md relative"
+          className="radial-gradient border-zinc-800 border-2 sm:w-[calc(50%-2.25rem)] ml-10 md:mr-0 mr-3 sm:ml-0 max-w-[28rem] px-4 py-2 rounded-md relative"
         >
           {index % 2 === 0 ? (
             <div className="absolute right-[100%] sm:!-right-4 top-1/2 -translate-y-1/2">

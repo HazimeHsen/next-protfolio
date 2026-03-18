@@ -69,7 +69,7 @@ export default function HomePageClient() {
             <div className="fixed inset-0">
               <Moon />
             </div>
-            <div className="space-y-16 md:space-y-24">
+            <div className="">
               <Highlights />
               <Projects />
               <ExperienceSection />

@@ -64,7 +64,7 @@ const Button = ({
       <motion.div
         whileTap={!disabled ? animationProps.whileTap : undefined}
         className={cn(
-          "group relative inline-flex w-fit items-center justify-center overflow-hidden px-6 py-2 font-semibold transition",
+          "group relative inline-flex w-fit items-center justify-center px-6 py-2 font-semibold transition cursor-pointer",
           solidToneClassName,
           containerClassName,
           {
@@ -75,14 +75,14 @@ const Button = ({
         {isOutline && (
           <>
             <div
-              className="pointer-events-none absolute inset-0 border border-white/35 group-hover:border-white/60"
+              className="pointer-events-none absolute inset-0 z-[1] border border-white/35 group-hover:border-white/60"
               style={{ clipPath: cutClipPath, WebkitClipPath: cutClipPath }}
             />
-            <div className="pointer-events-none absolute right-[-1px] bottom-[4px] h-px w-[13px] origin-right -rotate-45 bg-white/35 group-hover:bg-white/60" />
+            <div className="pointer-events-none absolute right-[1px] bottom-[7.5px] z-[2] h-px w-[12px] origin-right -rotate-45 bg-white/35 group-hover:bg-white/60 group-active:!bg-white/35" />
           </>
         )}
         <button
-          className={cn("inline-flex items-center justify-center gap-2", className)}
+          className={cn("relative z-[3] inline-flex h-full w-full items-center justify-center gap-2", className)}
           disabled={disabled}
           {...props}>
           {children}
