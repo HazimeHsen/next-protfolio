@@ -59,15 +59,16 @@ export default function About() {
           </BoxReveal>
         </div>
         <div className="flex-1 flex justify-center lg:justify-end">
-          <div className="flex items-start flex-col gap-6">
-            <BoxReveal duration={0.5} delay={0.4}>
+          <div className="w-full lg:max-w-[340px] flex items-start flex-col gap-6">
+            <BoxReveal width="100%" className="w-full" duration={0.5} delay={0.4}>
               <Image
                 quality={100}
-                src={"/personal/me.jpg"}
+                src={"/personal/me3.png"}
                 alt="Hussein Hazime"
                 width={300}
                 height={500}
-                className="md:w-[300px] w-full"
+                sizes="(max-width: 1024px) 100vw, 340px"
+                className="w-full h-auto"
               />
             </BoxReveal>
           </div>

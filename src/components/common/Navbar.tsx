@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { cn } from "@/utils/cn";
 import { TransitionLink } from "./TransitionLink";
 import { usePathname } from "next/navigation";
@@ -166,6 +166,17 @@ export const Tabs = ({
 };
 
 export default function Navbar({ animate = false }) {
+  const radius = 90;
+  const [showBorderGlow, setShowBorderGlow] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleBorderGlowMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    mouseX.set(event.clientX - rect.left);
+    mouseY.set(event.clientY - rect.top);
+  };
+
   const tabs = [
     { name: "Home", path: "/#home" },
     // { name: "Highlights", path: "/#highlights" },
@@ -176,8 +187,23 @@ export default function Navbar({ animate = false }) {
   ];
 
   return (
-    <div className="flex flex-col z-[5000] items-start justify-start overflow-x-hidden border-2 border-zinc-800 rounded-full fixed top-4 left-1/2 radial-gradient -translate-x-1/2 p-1">
-      <Tabs tabs={tabs} animate={animate} />
-    </div>
+    <motion.div
+      className="fixed top-4 left-1/2 z-[5000] -translate-x-1/2 rounded-full p-[2px] transition duration-300"
+      onMouseMove={handleBorderGlowMove}
+      onMouseEnter={() => setShowBorderGlow(true)}
+      onMouseLeave={() => setShowBorderGlow(false)}
+      style={{
+        background: useMotionTemplate`
+          radial-gradient(
+            ${showBorderGlow ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+            var(--primary),
+            transparent 80%
+          )
+        `,
+      }}>
+      <div className="flex flex-col items-start justify-start overflow-x-hidden border-2 border-zinc-800 rounded-full radial-gradient p-1">
+        <Tabs tabs={tabs} animate={animate} />
+      </div>
+    </motion.div>
   );
 }

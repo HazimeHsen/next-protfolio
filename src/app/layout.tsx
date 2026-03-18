@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  keywords: siteConfig.primaryKeywords,
+  keywords: [...siteConfig.primaryKeywords],
   authors: [{ name: siteConfig.ownerName, url: siteConfig.url }],
   creator: siteConfig.ownerName,
   publisher: siteConfig.ownerName,
