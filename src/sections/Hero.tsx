@@ -43,13 +43,13 @@ const Hero = () => {
           className="mt-8 mb-1 flex w-full flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <motion.div
-            className="w-full sm:w-[260px] bg-primary text-black font-semibold hover:bg-primary/80 transition"
+            className="w-full sm:w-fit bg-primary text-black font-semibold hover:bg-primary/80 transition"
             whileTap={{ scale: 0.95 }}
             style={{ clipPath: cutClipPath, WebkitClipPath: cutClipPath }}
           >
             <TransitionLink
               href="/projects"
-              className="inline-flex w-full items-center justify-center gap-2 px-6 py-3"
+              className="inline-flex w-full items-center justify-center gap-2 px-6 py-3 sm:w-auto"
             >
               Check All Projects
               <FaChevronRight className="text-xs" />
