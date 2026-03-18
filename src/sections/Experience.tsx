@@ -12,6 +12,7 @@ interface Experience {
   subtitle: string;
   date: string;
   icon: IconType;
+  highlights?: string[];
 }
 
 interface ExperienceCardProps {
@@ -158,6 +159,13 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             </span>{" "}
             <span className="text-xs">{experience.title}</span>
           </div>
+          {experience.highlights?.length ? (
+            <ul className="mt-3 list-disc space-y-1 pl-4 text-[11px] text-zinc-300">
+              {experience.highlights.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : null}
         </motion.div>
       </div>
     </>

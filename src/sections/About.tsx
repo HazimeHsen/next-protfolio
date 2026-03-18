@@ -39,9 +39,9 @@ export default function About() {
             </div>
           </BoxReveal>
           <BoxReveal className="mb-4" duration={0.5} delay={0.1}>
-            <h1 className="text-2xl md:text-4xl font-semibold">
+            <h2 className="text-2xl md:text-4xl font-semibold">
               {aboutContent.title}
-            </h1>
+            </h2>
           </BoxReveal>
           <BoxReveal
             className="md:text-base text-sm mb-4"

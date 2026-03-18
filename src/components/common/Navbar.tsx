@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/utils/cn";
 import { TransitionLink } from "./TransitionLink";
+import { usePathname } from "next/navigation";
 
 type Tab = {
   name: string;
@@ -27,6 +28,7 @@ export const Tabs = ({
   animate: boolean;
 }) => {
   const [active, setActive] = useState<Tab>(propTabs[0]);
+  const pathname = usePathname();
 
   const moveSelectedTabToTop = (idx: number) => {
     const newTabs = [...propTabs];
@@ -36,6 +38,18 @@ export const Tabs = ({
   };
 
   useEffect(() => {
+    if (pathname?.startsWith("/projects")) {
+      const projectsTab = propTabs.find((tab) => tab.name === "Projects");
+      if (projectsTab) {
+        setActive(projectsTab);
+      }
+      return;
+    }
+
+    if (pathname !== "/") {
+      return;
+    }
+
     const sections = document.querySelectorAll("section");
     let timeoutId: NodeJS.Timeout;
 
@@ -65,7 +79,7 @@ export const Tabs = ({
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(timeoutId);
     };
-  }, [propTabs]);
+  }, [pathname, propTabs]);
 
   return (
     <div

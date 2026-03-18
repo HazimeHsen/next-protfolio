@@ -14,7 +14,6 @@ import {
   LineBasicMaterial,
   EdgesGeometry,
   LineSegments,
-  Clock,
   Fog,
   TextureLoader,
 } from "three";
@@ -37,8 +36,6 @@ const points = [
 const path = new CatmullRomCurve3(points);
 path.tension = 0.5;
 
-const texts = ["Welcome", "TO", "My", "World"];
-
 interface ThreeSceneProps {
   onFadeOutComplete: () => void;
   isLoading: boolean;
@@ -51,8 +48,27 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   setIsLoading,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentText, setCurrentText] = useState(texts[0]);
   const [showSpaceShip, setShowSpaceShip] = useState(true);
+  const isLoadingRef = useRef(isLoading);
+  const hasCompletedIntroRef = useRef(false);
+
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (hasCompletedIntroRef.current) return;
+      hasCompletedIntroRef.current = true;
+      setIsLoading(false);
+      setShowSpaceShip(false);
+      onFadeOutComplete();
+    }, 12000);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [onFadeOutComplete, setIsLoading]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -65,13 +81,13 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       antialias: true,
+      powerPreference: "high-performance",
     });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(ww, wh);
 
     const scene = new THREE.Scene();
     scene.fog = new Fog(0x141414, 0, 100);
-
-    const clock = new Clock();
 
     let cameraRotationProxyX = 3.14159;
     let cameraRotationProxyY = 0;
@@ -101,14 +117,14 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     const textureLoader = new TextureLoader();
     const texture = textureLoader.load(
-      "https://s3-us-west-2.amazonaws.com/s.cdpn.io/68819/3d_space_5.jpg"
+      "/3d/start-sphere/3d_space_5.jpg"
     );
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.offset.set(0, 0);
     texture.repeat.set(15, 2);
 
     const mapHeight = textureLoader.load(
-      "https://s3-us-west-2.amazonaws.com/s.cdpn.io/68819/waveform-bump3.jpg"
+      "/3d/start-sphere/waveform-bump3.jpg"
     );
     mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
     mapHeight.offset.set(0, 0);
@@ -155,7 +171,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     const tubePerc = { percent: 0 };
 
-    gsap.to(tubePerc, {
+    const introTween = gsap.to(tubePerc, {
       percent: 0.96,
       duration: 5,
       ease: "linear",
@@ -163,6 +179,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         cameraTargetPercentage = tubePerc.percent;
       },
       onComplete: () => {
+        if (hasCompletedIntroRef.current) return;
+        hasCompletedIntroRef.current = true;
         gsap.to(canvasRef.current, {
           autoAlpha: 0,
           duration: 1,
@@ -172,9 +190,10 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       },
     });
 
+    let frameId = 0;
     const render = () => {
-      if (isLoading) {
-        requestAnimationFrame(render);
+      if (isLoadingRef.current) {
+        frameId = requestAnimationFrame(render);
         return;
       }
       currentCameraPercentage = cameraTargetPercentage;
@@ -183,7 +202,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
-      requestAnimationFrame(render);
+      frameId = requestAnimationFrame(render);
     };
     render();
 
@@ -200,25 +219,35 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      introTween.kill();
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
       scene.remove(tube);
       scene.remove(wireframe);
       scene.remove(light);
+      tubeGeometry.dispose();
+      innerTubeGeometry.dispose();
+      geo.dispose();
+      mat.dispose();
+      material.dispose();
+      texture.dispose();
+      mapHeight.dispose();
+      composer.dispose();
       renderer.dispose();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [onFadeOutComplete, isLoading]);
+  }, [onFadeOutComplete]);
 
   return (
     <>
-      {!isLoading && (
-        <>
-          <canvas
-            ref={canvasRef}
-            className="experience fixed top-0 left-0 w-full h-screen z-10"
-          />
-          <div className="scrollTarget absolute w-24 top-0 z-0"></div>
-        </>
-      )}
+      <canvas
+        ref={canvasRef}
+        className={`experience fixed top-0 left-0 w-full h-screen z-10 transition-opacity duration-300 ${
+          isLoading ? "opacity-0" : "opacity-100"
+        }`}
+      />
+      <div className="scrollTarget absolute w-24 top-0 z-0"></div>
       {showSpaceShip && (
         <SpaceShip
           setShowSpaceShip={setShowSpaceShip}

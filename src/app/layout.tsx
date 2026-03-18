@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "@/styles/globals.css";
+import { absoluteUrl, siteConfig } from "@/lib/seo";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -9,49 +10,119 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Hussein Hazime | Full-Stack Developer | React & Next.js Portfolio",
-  description:
-    "Hussein Hazime's portfolio showcasing expertise in full-stack development using React, Next.js, Node.js, and Tailwind CSS. Explore projects, skills, and web development journey.",
-  keywords: [
-    "Hussein Hazime",
-    "full-stack developer",
-    "React",
-    "Next.js",
-    "Tailwind CSS",
-    "JavaScript developer",
-    "Hsen portfolio",
-    "React portfolio",
-    "Next.js portfolio",
-    "web developer portfolio",
-  ],
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.title,
+    template: "%s | Hussein Hazime",
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: siteConfig.primaryKeywords,
+  authors: [{ name: siteConfig.ownerName, url: siteConfig.url }],
+  creator: siteConfig.ownerName,
+  publisher: siteConfig.ownerName,
+  category: "technology",
+  referrer: "origin-when-cross-origin",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  manifest: "/manifest.webmanifest",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
-    title: "Hussein Hazime | Full-Stack Developer | React & Next.js Portfolio",
-    description:
-      "Discover Hussein Hazime's portfolio as a skilled full-stack developer specializing in React, Next.js, Node.js, and Tailwind CSS. View projects and web development journey.",
-    url: "https://hsen.me",
-    siteName: "Hussein Hazime Portfolio",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
     images: [
       {
-        url: "https://hsen.me/_next/image?url=%2Fpersonal%2Fme.jpg&w=384&q=100",
+        url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: "Hussein Hazime Full-Stack Developer Portfolio",
+        alt: siteConfig.title,
       },
     ],
-    locale: "en_US",
+    locale: siteConfig.locale,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-
-    title: "Hussein Hazime | Full-Stack Developer | React & Next.js Portfolio",
-    description:
-      "Explore Hussein Hazime's portfolio, showcasing projects and skills as a React, Next.js, and Tailwind CSS developer.",
-    images: [
-      "https://hsen.me/_next/image?url=%2Fpersonal%2Fme.jpg&w=384&q=100",
-    ],
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
+    creator: "@HazimeHsen",
   },
 };
+
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    inLanguage: "en-US",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteConfig.url}/projects?query={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: siteConfig.ownerName,
+    url: siteConfig.url,
+    email: siteConfig.email,
+    telephone: siteConfig.phone,
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: siteConfig.location,
+    },
+    image: absoluteUrl(siteConfig.ogImage),
+    jobTitle: siteConfig.role,
+    alumniOf: "Islamic University of Lebanon",
+    knowsAbout: siteConfig.technologies,
+    sameAs: [
+      siteConfig.github,
+      siteConfig.linkedin,
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: "Hussein Hazime Development Services",
+    url: siteConfig.url,
+    description:
+      "Freelance full-stack and Next.js development services for websites, web apps, and scalable digital products.",
+    areaServed: "Worldwide",
+    provider: {
+      "@type": "Person",
+      name: siteConfig.ownerName,
+      url: siteConfig.url,
+    },
+    serviceType: [
+      "Website development",
+      "Next.js development",
+      "React development",
+      "Full-stack web application development",
+    ],
+  },
+];
 
 export default function RootLayout({
   children,
@@ -63,6 +134,11 @@ export default function RootLayout({
       <body
         className={`${poppins.className} min-h-screen overflow-y-auto overflow-x-hidden`}
       >
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         {children}
       </body>
     </html>

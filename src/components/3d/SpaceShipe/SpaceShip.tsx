@@ -1,9 +1,9 @@
-import { useRef, useEffect, useState, Suspense } from "react";
+import { useRef, useEffect, Suspense } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 import gsap from "gsap";
-import { Html, useProgress } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 
 interface ModalProps {
   isLoading: boolean;
@@ -36,6 +36,8 @@ const Modal: React.FC<ModalProps> = ({
   }, [gltf, setIsLoading]);
 
   useEffect(() => {
+    if (!meshRef.current) return;
+
     const tl = gsap.timeline({ repeat: 0 });
 
     tl.to(meshRef.current!.rotation, {
@@ -89,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({
     return () => {
       tl.kill();
     };
-  }, []);
+  }, [setShowSpaceShip]);
 
   return <primitive object={gltf.scene} ref={meshRef} />;
 };
@@ -105,9 +107,24 @@ const SpaceShip: React.FC<SpaceShipProps> = ({
   setIsLoading,
   setShowSpaceShip,
 }) => {
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const fallbackTimeout = window.setTimeout(() => {
+      setIsLoading(false);
+      setShowSpaceShip(false);
+    }, 8000);
+
+    return () => {
+      window.clearTimeout(fallbackTimeout);
+    };
+  }, [isLoading, setIsLoading, setShowSpaceShip]);
+
   return (
     <Canvas
       className="z-[50]"
+      dpr={[1, 1.5]}
+      gl={{ antialias: true, powerPreference: "high-performance" }}
       style={{
         position: "fixed",
         top: 0,

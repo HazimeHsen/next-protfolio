@@ -122,7 +122,12 @@ export default function Contact() {
                 inView={inView}
                 className="flex mt-4 space-x-4">
                 {contactContent.socialLinks.map((link, index) => (
-                  <Link href={link.href} key={index}>
+                  <Link
+                    href={link.href}
+                    key={index}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <link.icon size={24} />
                   </Link>
                 ))}
@@ -174,9 +179,10 @@ export default function Contact() {
               inView={inView}
               className="flex w-full justify-center">
               <Button
+                variant="solid"
                 disabled={isSubmitting}
-                containerClassName="max-w-full"
-                className="w-full"
+                containerClassName="w-full max-w-full"
+                className="w-full py-1"
                 onClick={(e) => handleSubmit(e)}>
                 {isSubmitting
                   ? contactContent.submittingButton

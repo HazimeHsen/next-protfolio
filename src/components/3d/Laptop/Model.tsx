@@ -1,23 +1,71 @@
 import React, { useRef, useEffect, useState, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { createPortal, useFrame } from "@react-three/fiber";
+import { Html, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
 interface MacbookModelProps {
   isInView: boolean;
   texture: string;
+  livePreviewUrl?: string;
 }
 
-const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
+const LIVE_PREVIEW_WIDTH = 1280;
+const LIVE_PREVIEW_HEIGHT = 800;
+const LIVE_PREVIEW_EDGE = 18;
+const LIVE_PREVIEW_DISTANCE_FACTOR = 1.38;
+const LIVE_PREVIEW_Z_OFFSET = 0.00012;
+
+const MacbookModel: React.FC<MacbookModelProps> = ({
+  isInView,
+  texture,
+  livePreviewUrl,
+}) => {
   const { scene: originalScene } = useGLTF("/3d/macbook-pro.glb");
   const [isLoaded, setIsLoaded] = useState(false);
   const [screenTexture, setScreenTexture] = useState<THREE.Texture | null>(
     null
   );
-  const [scale, setScale] = useState([1, 1, 1]);
-  const [position, setPosition] = useState([0, 0, 0]); // State to manage position
+  const [screenMesh, setScreenMesh] = useState<THREE.Mesh | null>(null);
+  const [scale, setScale] = useState<[number, number, number]>([1, 1, 1]);
+  const [position, setPosition] = useState<[number, number, number]>([0, 0, 0]);
   const laptopRef = useRef<THREE.Group>(null);
+  const bodyMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0x1b1d22,
+        emissive: 0x050607,
+        emissiveIntensity: 0.14,
+        metalness: 0.34,
+        roughness: 0.5,
+        side: THREE.DoubleSide,
+      }),
+    []
+  );
+  const frameMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0x2f333a,
+        emissive: 0x06070a,
+        emissiveIntensity: 0.12,
+        metalness: 0.28,
+        roughness: 0.46,
+        side: THREE.DoubleSide,
+      }),
+    []
+  );
+  const logoMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0xc8cdd5,
+        emissive: 0x101113,
+        emissiveIntensity: 0.1,
+        metalness: 0.25,
+        roughness: 0.36,
+        side: THREE.DoubleSide,
+      }),
+    []
+  );
 
   const scene = useMemo(() => {
     const clone = originalScene.clone();
@@ -32,38 +80,59 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   const textureLoader = useRef(new THREE.TextureLoader());
 
   useEffect(() => {
+    if (livePreviewUrl) {
+      setScreenTexture(null);
+      setIsLoaded(true);
+      return;
+    }
+
     textureLoader.current.load(texture, (loadedTexture) => {
       loadedTexture.colorSpace = THREE.SRGBColorSpace;
       loadedTexture.flipY = false;
       setScreenTexture(loadedTexture);
       setIsLoaded(true);
     });
-  }, [texture]);
+  }, [texture, livePreviewUrl]);
 
   useEffect(() => {
-    if (isLoaded && screenTexture) {
+    if (isLoaded) {
+      const screenMaterial = livePreviewUrl
+        ? new THREE.MeshStandardMaterial({
+            color: 0x0b0d12,
+            metalness: 0.05,
+            roughness: 0.82,
+          })
+        : screenTexture
+          ? new THREE.MeshBasicMaterial({
+              map: screenTexture,
+            })
+          : null;
+
+      if (!screenMaterial) {
+        return;
+      }
+
+      const detectedScreenMesh = scene.getObjectByName("Screen");
+      if (detectedScreenMesh instanceof THREE.Mesh) {
+        setScreenMesh(detectedScreenMesh);
+      }
+
       scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           switch (child.name) {
             case "Screen":
-              child.material = new THREE.MeshBasicMaterial({
-                map: screenTexture,
-              });
+              child.material = screenMaterial;
               break;
             case "Keyboard":
             case "Body":
             case "Touchbar":
+              child.material = bodyMaterial;
+              break;
             case "Frame":
-              child.material = new THREE.MeshPhongMaterial({
-                color: 0x1f2025,
-                side: THREE.DoubleSide,
-              });
+              child.material = frameMaterial;
               break;
             case "Logo":
-              child.material = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                side: THREE.DoubleSide,
-              });
+              child.material = logoMaterial;
               break;
             default:
               break;
@@ -80,22 +149,35 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
           }
         });
       }
+
+      return () => {
+        screenMaterial.dispose();
+      };
     }
-  }, [scene, screenTexture, isLoaded, isInView]);
+  }, [
+    scene,
+    screenTexture,
+    isLoaded,
+    isInView,
+    bodyMaterial,
+    frameMaterial,
+    logoMaterial,
+    livePreviewUrl,
+  ]);
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
 
       if (width >= 1024) {
-        setScale([1.25, 1.25, 1.25]);
-        setPosition([0, 0, 0]); 
+        setScale([1.26, 1.26, 1.26]);
+        setPosition([0, 0, 0]);
       } else if (width >= 768) {
-        setScale([1.1, 1.1, 1.1]);
-        setPosition([0, 0, 0]); 
+        setScale([1.12, 1.12, 1.12]);
+        setPosition([0, 0, 0]);
       } else {
-        setScale([1.28, 1.28, 1.28]);
-        setPosition([0, -0.5, 0]);
+        setScale([1.24, 1.24, 1.24]);
+        setPosition([0, -0.24, 0]);
       }
     };
 
@@ -126,7 +208,7 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   }, [isInView, isLoaded, scene]);
 
   useFrame(({ mouse }) => {
-    if (isInView && isLoaded && laptopRef.current) {
+    if (isInView && isLoaded && laptopRef.current && !livePreviewUrl) {
       const { x, y } = mouse;
       gsap.to(laptopRef.current.rotation, {
         y: (x * Math.PI) / 30,
@@ -138,12 +220,42 @@ const MacbookModel: React.FC<MacbookModelProps> = ({ isInView, texture }) => {
   });
 
   return isLoaded ? (
-    <primitive
-      object={scene}
-      scale={scale}
-      position={position}
-      ref={laptopRef}
-    />
+    <group scale={scale} position={position} ref={laptopRef}>
+      <primitive object={scene} />
+
+      {livePreviewUrl && screenMesh
+        ? createPortal(
+            <Html
+              transform
+              position={[0, 0, LIVE_PREVIEW_Z_OFFSET]}
+              distanceFactor={LIVE_PREVIEW_DISTANCE_FACTOR}
+              pointerEvents="auto"
+              zIndexRange={[20, 0]}>
+              <div
+                className="overflow-hidden rounded-[24px] bg-black"
+                style={{
+                  width: LIVE_PREVIEW_WIDTH,
+                  height: LIVE_PREVIEW_HEIGHT,
+                  padding: LIVE_PREVIEW_EDGE,
+                  pointerEvents: "auto",
+                  boxShadow: "inset 0 0 0 1px rgba(148, 163, 184, 0.22)",
+                }}>
+                <div className="h-full w-full overflow-hidden rounded-[14px] bg-black">
+                  <iframe
+                    src={livePreviewUrl}
+                    title="Live project preview"
+                    className="h-full w-full border-0 bg-black"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                  />
+                </div>
+              </div>
+            </Html>,
+            screenMesh
+          )
+        : null}
+    </group>
   ) : null;
 };
 

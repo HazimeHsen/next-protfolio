@@ -1,10 +1,18 @@
-import { HTMLAttributes } from "react";
+"use client";
+
+import { ButtonHTMLAttributes } from "react";
 import { motion, Transition } from "framer-motion";
 import { cn } from "@/utils/cn";
 
-interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
+interface ButtonProps
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    "onAnimationStart" | "onAnimationEnd"
+  > {
   containerClassName?: string;
   disabled?: boolean;
+  variant?: "animated" | "solid";
+  tone?: "primary" | "outline";
 }
 
 const animationProps: {
@@ -38,8 +46,51 @@ const Button = ({
   className,
   children,
   disabled,
+  variant = "animated",
+  tone = "primary",
   ...props
 }: ButtonProps) => {
+  const cutClipPath =
+    "polygon(0 0,0 0,100% 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 100%)";
+
+  if (variant === "solid") {
+    const isOutline = tone === "outline";
+    const solidToneClassName =
+      isOutline
+        ? "bg-white/10 text-white hover:bg-white/15"
+        : "bg-primary text-black hover:bg-primary/85";
+
+    return (
+      <motion.div
+        whileTap={!disabled ? animationProps.whileTap : undefined}
+        className={cn(
+          "group relative inline-flex w-fit items-center justify-center overflow-hidden px-6 py-2 font-semibold transition",
+          solidToneClassName,
+          containerClassName,
+          {
+            "opacity-50 cursor-not-allowed": disabled,
+          }
+        )}
+        style={{ clipPath: cutClipPath, WebkitClipPath: cutClipPath }}>
+        {isOutline && (
+          <>
+            <div
+              className="pointer-events-none absolute inset-0 border border-white/35 group-hover:border-white/60"
+              style={{ clipPath: cutClipPath, WebkitClipPath: cutClipPath }}
+            />
+            <div className="pointer-events-none absolute right-[-1px] bottom-[4px] h-px w-[13px] origin-right -rotate-45 bg-white/35 group-hover:bg-white/60" />
+          </>
+        )}
+        <button
+          className={cn("inline-flex items-center justify-center gap-2", className)}
+          disabled={disabled}
+          {...props}>
+          {children}
+        </button>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={animationProps.initial}

@@ -9,6 +9,9 @@
   --radial-gradient-background: 250, 250, 250;
   --solid-color-background: 15, 15, 15;
   --overlay-color: 255, 255, 255;
+  --scroll-track: transparent;
+  --scroll-thumb: #3f3f46;
+  --scroll-thumb-hover: #52525b;
 }
 
 html{
@@ -29,6 +32,34 @@ body {
   transition-property: opacity, transform, filter, background;
   transition-timing-function: ease-in-out;
   transition-duration: 500ms;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .page-transition {
@@ -133,18 +164,13 @@ select {
 }
 
 .laptop{
-  height: 50vh;
+  height: 44vh;
 }
 
 @media (min-width: 768px) {
   .laptop{
-    height: 100vh;
+    height: 70vh;
   }
-}
-
-.link{
-  -webkit-clip-path: polygon(0 0,0 0,100% 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 100%);
-  clip-path: polygon(0 0,0 0,100% 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 100%);
 }
 
 ::selection {

@@ -1,94 +1,35 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import Navbar from "@/components/common/Navbar";
-import About from "@/sections/About";
-import Contact from "@/sections/Contact";
-import ExperienceSection from "@/sections/Experience";
-import Hero from "@/sections/Hero";
-import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Moon from "@/components/3d/Moon";
-import ThreeScene from "@/components/3d/StartAnimation";
-import Highlights from "@/sections/Highlights";
-import Projects from "@/sections/Projects";
-import Script from "next/script";
+import type { Metadata } from "next";
+import HomePageClient from "./HomePageClient";
+import { siteConfig } from "@/lib/seo";
 
-gsap.registerPlugin(ScrollTrigger);
+export const metadata: Metadata = {
+  title: "Software Developer & Next.js Website Developer",
+  description:
+    "Hire Hussein Hazime, a full-stack software developer and Next.js website developer building fast, modern, SEO-friendly web applications.",
+  alternates: {
+    canonical: "/",
+  },
+  keywords: [
+    ...siteConfig.primaryKeywords,
+    "hire web developer",
+    "hire next.js developer",
+    "freelance web developer",
+  ],
+  openGraph: {
+    title: "Hussein Hazime | Software Developer & Next.js Website Developer",
+    description:
+      "Portfolio and case studies by Hussein Hazime, a full-stack software developer focused on high-performance Next.js and React applications.",
+    url: "/",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hussein Hazime | Software Developer & Next.js Website Developer",
+    description:
+      "Portfolio and case studies by Hussein Hazime, a full-stack software developer focused on high-performance Next.js and React applications.",
+  },
+};
 
 export default function Home() {
-  const [showContent, setShowContent] = useState(false);
-  const [showThreeScene, setShowThreeScene] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const hasShownAnimation = sessionStorage.getItem("hasShownAnimation");
-    if (hasShownAnimation) {
-      setShowThreeScene(false);
-      setShowContent(true);
-    }
-
-    const handleBeforeUnload = () => {
-      sessionStorage.removeItem("hasShownAnimation");
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
-
-  const handleFadeOutComplete = () => {
-    sessionStorage.setItem("hasShownAnimation", "true");
-    setShowThreeScene(false);
-    setShowContent(true);
-  };
-
-  return (
-    <div className="relative overflow-hidden">
-      {showThreeScene && (
-        <ThreeScene
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
-          onFadeOutComplete={handleFadeOutComplete}
-        />
-      )}
-      <AnimatePresence>
-        {showContent && (
-          <motion.div
-            key="content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="relative z-20">
-            <Navbar />
-            <Hero />
-            <div className="fixed inset-0">
-              <Moon />
-            </div>
-            <Highlights />
-            <Projects />
-            <ExperienceSection />
-            <About />
-            <Contact />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <Script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-8SNS7WXM1Y"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-8SNS7WXM1Y');
-        `}
-      </Script>
-    </div>
-  );
+  return <HomePageClient />;
 }

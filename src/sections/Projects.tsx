@@ -4,16 +4,17 @@ import Macbook from "@/components/3d/Laptop/Mackbook";
 import Phone from "@/components/3d/Phone";
 import StarBg from "@/components/Animations/StarBg";
 import { TransitionLink } from "@/components/common/TransitionLink";
-import { projects } from "@/data";
+import { projectsWithSlug } from "@/lib/projects";
 import { FaArrowRight } from "react-icons/fa";
 import Divider from "@/components/common/Divider";
 import { motion } from "framer-motion";
 import BlurFade from "@/components/Animations/BlurFade";
 
 interface ProjectData {
+  id: string;
+  slug: string;
   title: string;
   description: string;
-  link: string;
   type: "phone" | "laptop";
   textures: string[];
 }
@@ -24,6 +25,8 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
+  const cutClipPath =
+    "polygon(0 0,0 0,100% 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 100%)";
   const isEven = index % 2 === 0;
   const { ref, inView } = useInView({
     triggerOnce: true,
@@ -33,10 +36,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
   return (
     <div
       ref={ref}
-      className={`flex flex-col-reverse items-center justify-between md:h-[100vh] w-screen z-50 relative ${
+      className={`mx-auto flex w-full max-w-[1600px] flex-col-reverse items-center justify-between py-4 md:min-h-[58vh] md:py-6 z-50 relative ${
         isEven ? "md:flex-row" : "md:flex-row-reverse"
       }`}>
-      <div className="flex flex-col gap-4 px-4 md:px-10 md:max-w-[550px]">
+      <div className="flex flex-col gap-4 px-3 sm:px-6 md:px-12 lg:px-16 xl:px-20 md:max-w-[620px]">
         <div className="space-y-5">
           <BlurFade inView={inView} className="flex items-center gap-4">
             <Divider
@@ -62,22 +65,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
         </div>
         <BlurFade inView={inView} delay={0.3}>
           <motion.div
-            className="w-fit link bg-primary text-black font-semibold hover:bg-primary/80 transition"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.95 }}>
+            className="w-fit bg-primary text-black font-semibold hover:bg-primary/80 transition"
+            whileTap={{ scale: 0.95 }}
+            style={{ clipPath: cutClipPath, WebkitClipPath: cutClipPath }}>
             <TransitionLink
-              href={"/projects"}
-              target="_blank"
-              className="flex items-center gap-2 justify-center px-4 py-2"
-              rel="noopener noreferrer">
-              <span>View More</span>
+              href={`/projects/${data.slug}`}
+              className="flex items-center gap-2 justify-center px-4 py-2">
+              <span>View Case Study</span>
               <FaArrowRight />
             </TransitionLink>
           </motion.div>
         </BlurFade>
       </div>
 
-      <div className="md:h-full w-full md:w-[60%]">
+      <div className="w-full md:w-[58%]">
         {data.type === "laptop" ? (
           <Macbook texture={data.textures[0]} />
         ) : (
@@ -93,8 +94,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
 };
 
 const Projects: React.FC = () => {
+  const featuredProjects = projectsWithSlug.slice(0, 3);
+
   return (
-    <section id="projects" className="py-10 relative z-50">
+    <section
+      id="projects"
+      className="relative z-50 py-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
       <StarBg
         className="absolute inset-0 z-0"
         quantity={100}
@@ -104,30 +109,17 @@ const Projects: React.FC = () => {
         color={"#ffffff"}
       />
 
-      <ProjectCard
-        index={0}
-        data={{
-          ...projects[0],
-          type: "laptop",
-          textures: [...projects[0].images],
-        }}
-      />
-      <ProjectCard
-        index={1}
-        data={{
-          ...projects[1],
-          type: "laptop",
-          textures: [...projects[1].images],
-        }}
-      />
-      <ProjectCard
-        index={2}
-        data={{
-          ...projects[3],
-          type: "laptop",
-          textures: [...projects[3].images],
-        }}
-      />
+      {featuredProjects.map((project, index) => (
+        <ProjectCard
+          key={project.id}
+          index={index}
+          data={{
+            ...project,
+            type: project.type as "phone" | "laptop",
+            textures: [...project.images],
+          }}
+        />
+      ))}
     </section>
   );
 };
