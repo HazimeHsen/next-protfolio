@@ -179,24 +179,23 @@ select {
   right: 0;
   top: -8rem;
   height: 8rem;
-  transform: translateY(0);
-  animation: timeline-scan 3.6s linear infinite;
-  will-change: transform, opacity;
+  animation: timeline-scan 3.2s linear infinite;
+  will-change: top, opacity;
 }
 
 @keyframes timeline-scan {
   0% {
-    transform: translateY(0);
+    top: -8rem;
     opacity: 0;
   }
-  18% {
+  14% {
     opacity: 1;
   }
-  80% {
+  86% {
     opacity: 1;
   }
   100% {
-    transform: translateY(calc(100% + 8rem));
+    top: 100%;
     opacity: 0;
   }
 }

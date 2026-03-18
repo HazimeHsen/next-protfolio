@@ -1,6 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { motion, useAnimation, useMotionTemplate, useMotionValue } from "framer-motion";
+import {
+  motion,
+  useAnimation,
+  useMotionTemplate,
+  useMotionValue,
+} from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
 import StarBg from "@/components/Animations/StarBg";
@@ -21,23 +26,6 @@ interface ExperienceCardProps {
 }
 
 const ExperienceSection: React.FC = () => {
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.3,
-  });
-
-  useEffect(() => {
-    if (inView) {
-      controls.start("visible");
-    }
-  }, [inView, controls]);
-
-  const lineAnimation = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <section id="experience" className="py-10 relative">
       <StarBg
@@ -48,27 +36,14 @@ const ExperienceSection: React.FC = () => {
         staticity={40}
         color={"#ffffff"}
       />
-      <motion.div
-        initial="hidden"
-        animate={controls}
-        variants={lineAnimation}
-        transition={{ duration: 0.3 }}
-      ></motion.div>
-      <motion.div
-        ref={ref}
-        initial="hidden"
-        animate={controls}
-        variants={lineAnimation}
-        transition={{ duration: 0.3 }}
-        className="pl-7 sm:pl-0 before:ml-7 overflow-hidden space-y-8 w-full lg:max-w-5xl sm:mx-auto py-14 relative before:absolute before:inset-0 sm:before:mx-auto before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent"
-      >
-        <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-[2px] -translate-x-1/2 overflow-hidden sm:block [mask-image:linear-gradient(to_bottom,transparent_0%,white_12%,white_88%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,white_12%,white_88%,transparent_100%)]">
+      <div className="pl-7 sm:pl-0 before:ml-7 overflow-hidden space-y-8 w-full lg:max-w-5xl sm:mx-auto py-14 relative before:absolute before:inset-0 sm:before:mx-auto before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+        <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-[2px] -translate-x-1/2 overflow-hidden sm:block [mask-image:linear-gradient(to_bottom,transparent_0%,white_4%,white_96%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,white_4%,white_96%,transparent_100%)]">
           <div className="timeline-scan w-full bg-gradient-to-b from-transparent via-primary to-transparent opacity-90" />
         </div>
         {experiencesContent.map((experience, index) => (
           <ExperienceCard key={index} experience={experience} index={index} />
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 };
@@ -78,15 +53,15 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   index,
 }) => {
   const radius = 120;
-  const [showBorderGlow, setShowBorderGlow] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
+  const entryDelay = 0.12;
   const controls = useAnimation();
   const [ref, inView] = useInView({
     triggerOnce: true,
-    threshold: 0.5,
   });
+  const [showBorderGlow, setShowBorderGlow] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const isMobile = useMediaQuery({ maxWidth: 639 });
 
   useEffect(() => {
     if (inView) {
@@ -95,33 +70,42 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   }, [inView, controls]);
 
   const iconAnimation = {
-    hidden: { scale: 0.4 },
+    hidden: { scale: 0.5, opacity: 0 },
     visible: {
       scale: 1,
-      transition: { type: "spring", stiffness: 260, damping: 20 },
+      opacity: 1,
+      transition: { delay: entryDelay, duration: 0.14, ease: "easeOut" },
     },
   };
 
-  const slideAnimation = {
-    hidden: { opacity: 0, x: "-100px" },
+  const slideFromLeft = {
+    hidden: { opacity: 0, x: -40 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { type: "spring", stiffness: 260, damping: 20 },
+      transition: {
+        delay: entryDelay,
+        duration: 0.18,
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
   };
 
   const slideFromRight = {
-    hidden: { opacity: 0, x: "100px" },
+    hidden: { opacity: 0, x: 40 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { type: "spring", stiffness: 260, damping: 20 },
+      transition: {
+        delay: entryDelay,
+        duration: 0.18,
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
   };
-  const isMobile = useMediaQuery({ maxWidth: 639 });
 
   const handleBorderGlowMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!showBorderGlow) return;
     const rect = event.currentTarget.getBoundingClientRect();
     mouseX.set(event.clientX - rect.left);
     mouseY.set(event.clientY - rect.top);
@@ -130,16 +114,15 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   return (
     <>
       <div
+        ref={ref}
         className={`relative sm:flex items-center text-black px-1 mb-3 ${
           index % 2 === 0 ? "sm:justify-start" : "sm:justify-end"
         }`}
       >
         <motion.div
-          ref={ref}
           initial="hidden"
           animate={controls}
           variants={iconAnimation}
-          transition={{ duration: 0.5, delay: 0.2 }}
           className="flex absolute sm:mx-auto -ml-5 inset-0 ring-4 ring-zinc-800 hover:ring-primary/70 my-auto items-center transform -translate-y-1/2 justify-center w-10 h-10 rounded-full bg-slate-200 text-black shadow md:order-1 transition-all duration-300 hover:shadow-[0_0_16px_rgba(0,229,255,0.45)]"
         >
           <experience.icon />
@@ -147,10 +130,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
         <motion.div
           initial="hidden"
           animate={controls}
-          variants={
-            index % 2 === 0 && !isMobile ? slideAnimation : slideFromRight
-          }
-          transition={{ duration: 0.5 }}
+          variants={index % 2 === 0 && !isMobile ? slideFromLeft : slideFromRight}
           onMouseMove={handleBorderGlowMove}
           onMouseEnter={() => setShowBorderGlow(true)}
           onMouseLeave={() => {

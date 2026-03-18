@@ -36,7 +36,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ data, index }) => {
   return (
     <div
       ref={ref}
-      className={`mx-auto flex w-full max-w-[1600px] flex-col-reverse items-center justify-between py-4 md:min-h-[58vh] md:py-6 z-50 relative ${
+      className={`mx-auto flex w-full max-w-[1600px] flex-col-reverse items-center justify-between md:min-h-[58vh] z-50 relative ${
         isEven ? "md:flex-row" : "md:flex-row-reverse"
       }`}>
       <div className="flex flex-col gap-4 px-3 sm:px-6 md:px-12 lg:px-16 xl:px-20 md:max-w-[620px]">

@@ -55,10 +55,25 @@ export const Tabs = ({
 
     const handleScroll = () => {
       let current = "home";
+      const scrollY = window.pageYOffset;
+      const viewportBottom = scrollY + window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const isNearPageBottom = documentHeight - viewportBottom <= 4;
+
+      if (isNearPageBottom) {
+        const contactTab = propTabs.find((tab) => tab.name === "Contact");
+        if (contactTab) {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            setActive(contactTab);
+          }, 100);
+        }
+        return;
+      }
 
       sections.forEach((section) => {
         const sectionTop = section.offsetTop;
-        if (window.pageYOffset >= sectionTop - 200) {
+        if (scrollY >= sectionTop - 200) {
           current = section.getAttribute("id") || "home";
         }
       });
@@ -75,6 +90,7 @@ export const Tabs = ({
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
     return () => {
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(timeoutId);
