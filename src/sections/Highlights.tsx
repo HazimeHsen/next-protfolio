@@ -1,8 +1,8 @@
 import GridPattern from "@/components/Animations/AnimatedGridPattern";
 import NumberTicker from "@/components/Animations/NumberTicker";
 import { cn } from "@/utils/cn";
-import React, { useRef, useState } from "react";
-import { motion, useInView, useMotionTemplate, useMotionValue } from "framer-motion";
+import React, { useState } from "react";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { highlightsContent } from "@/data";
 
 interface HighlightCardProps {
@@ -12,8 +12,6 @@ interface HighlightCardProps {
 }
 
 const HighlightCard: React.FC<HighlightCardProps> = ({ nb, title, delay }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
   const radius = 140;
   const [showBorderGlow, setShowBorderGlow] = useState(false);
   const mouseX = useMotionValue(0);
@@ -39,9 +37,9 @@ const HighlightCard: React.FC<HighlightCardProps> = ({ nb, title, delay }) => {
   return (
     <motion.div
       className="group/highlight w-full max-w-[32rem] rounded-lg p-[2px] transition duration-300"
-      ref={ref}
       initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
       variants={cardVariants}
       onMouseMove={handleBorderGlowMove}
       onMouseEnter={() => setShowBorderGlow(true)}

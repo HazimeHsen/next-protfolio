@@ -1,12 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   motion,
-  useAnimation,
   useMotionTemplate,
   useMotionValue,
 } from "framer-motion";
-import { useInView } from "react-intersection-observer";
 import { useMediaQuery } from "react-responsive";
 import StarBg from "@/components/Animations/StarBg";
 import { experiencesContent } from "@/data";
@@ -54,12 +52,6 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
 }) => {
   const radius = 120;
   const entryDelay = 0.12;
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.85,
-    rootMargin: "0px 0px -40px 0px",
-  });
   const [showBorderGlow, setShowBorderGlow] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -73,18 +65,16 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
     )
   `;
 
-  useEffect(() => {
-    if (inView) {
-      controls.start("visible");
-    }
-  }, [inView, controls]);
-
   const iconAnimation = {
-    hidden: { scale: 0.5, opacity: 0 },
+    hidden: { scale: 0.7, opacity: 0 },
     visible: {
       scale: 1,
       opacity: 1,
-      transition: { delay: entryDelay, duration: 0.14, ease: "easeOut" },
+      transition: {
+        delay: entryDelay,
+        duration: 0.18,
+        ease: [0.22, 1, 0.36, 1],
+      },
     },
   };
 
@@ -124,14 +114,14 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   return (
     <>
       <div
-        ref={ref}
         className={`relative sm:flex items-center text-black px-1 mb-3 ${
           index % 2 === 0 ? "sm:justify-start" : "sm:justify-end"
         }`}
       >
         <motion.div
           initial="hidden"
-          animate={controls}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2, margin: "0px 0px -80px 0px" }}
           variants={iconAnimation}
           className="flex absolute sm:mx-auto -ml-5 inset-0 ring-4 ring-zinc-800 hover:ring-primary/70 my-auto items-center transform -translate-y-1/2 justify-center w-10 h-10 rounded-full bg-slate-200 text-black shadow md:order-1 transition-all duration-300 hover:shadow-[0_0_16px_rgba(0,229,255,0.45)]"
         >
@@ -139,7 +129,8 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
         </motion.div>
         <motion.div
           initial="hidden"
-          animate={controls}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2, margin: "0px 0px -80px 0px" }}
           variants={index % 2 === 0 && !isMobile ? slideFromLeft : slideFromRight}
           onMouseMove={handleBorderGlowMove}
           onMouseEnter={() => setShowBorderGlow(true)}
