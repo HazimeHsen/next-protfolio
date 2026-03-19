@@ -9,7 +9,7 @@ import {
 export const heroContent = {
   title: "Hussein Hazime \n Software Engineer",
   description:
-    "Full-Stack Software Engineer with 3.5+ years of professional experience building scalable, production-grade web and mobile applications across e-commerce, AI-powered platforms, licensing systems, and real-time environments.",
+    "Software Engineer with 3.5+ years of professional experience building scalable, production-grade web and mobile applications across e-commerce, AI-powered platforms, licensing systems, and real-time environments.",
 };
 
 export const highlightsContent = [
@@ -217,7 +217,7 @@ export const projects = [
 export const aboutContent = {
   title: "Hi there!",
   intro:
-    "I am Hussein Hazime, a full-stack software engineer based in Lebanon with 3.5+ years of experience delivering scalable, production-grade web and mobile applications.",
+    "I am Hussein Hazime, a Software Engineer based in Lebanon with 3.5+ years of experience delivering scalable, production-grade web and mobile applications.",
   hobbies:
     "My stack includes Next.js, React, Node.js (NestJS), Firebase, MongoDB, Supabase, React Native, Expo, and Flutter, with hands-on experience in AI integrations, payment systems, cron automation, and real-time applications.",
   sectionTitle: "About Me",
