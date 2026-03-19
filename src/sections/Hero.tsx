@@ -28,7 +28,7 @@ const Hero = () => {
           delay={0}
           className="text-center"
         >
-          <h1 className="whitespace-pre-line text-4xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
+          <h1 className="whitespace-pre-line pb-2 text-4xl font-bold leading-[1.08] bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50 md:text-7xl md:leading-[1.06]">
             {heroContent.title}
           </h1>
         </BlurFade>

@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa";
 
 export const heroContent = {
-  title: "Hussein Hazime \n Full-Stack Software Engineer",
+  title: "Hussein Hazime \n Software Engineer",
   description:
     "Full-Stack Software Engineer with 3.5+ years of professional experience building scalable, production-grade web and mobile applications across e-commerce, AI-powered platforms, licensing systems, and real-time environments.",
 };
