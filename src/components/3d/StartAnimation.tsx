@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import LoadingPage from "@/components/LoadingPage/LoadingPage";
 import * as THREE from "three";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -50,12 +50,15 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   setIsLoading,
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLoadingRef = useRef(isLoading);
   const hasCompletedIntroRef = useRef(false);
   const hasStartedOutroRef = useRef(false);
+  const hasStartedIntroRef = useRef(false);
   const playOutroRef = useRef<(() => void) | null>(null);
   const finishIntroRef = useRef<(() => void) | null>(null);
+  const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -133,11 +136,14 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const shipOffset = new Vector3();
     const shipProgressPoint = new Vector3();
     const shipLookAheadPoint = new Vector3();
+    const shipEntryPoint = new Vector3();
+    const shipEntryBlendPosition = new Vector3();
     const shipPosition = new Vector3();
     const shipLookDirection = new Vector3();
     const shipNormal = new Vector3();
     const shipBinormal = new Vector3();
     const shipBinormalOffset = new Vector3();
+    const cameraForward = new Vector3();
     const shipLookTarget = new Vector3();
     const shipMobileScale = 0.12;
     const shipDesktopScale = 0.16;
@@ -199,7 +205,10 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(ambientLight);
 
     let shipModel: THREE.Object3D | null = null;
+    const introState = { shipReveal: 0, shipEntry: 0, shipBoost: 0 };
     const outroState = { shipOpacity: 1 };
+    let hasAssetsReady = false;
+    let hasRenderedReadyFrame = false;
 
     const setShipOpacity = (opacity: number) => {
       if (!shipModel) return;
@@ -221,6 +230,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const finishIntro = () => {
       if (hasCompletedIntroRef.current) return;
       hasCompletedIntroRef.current = true;
+      isLoadingRef.current = false;
       setIsLoading(false);
       onFadeOutComplete();
     };
@@ -283,7 +293,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         shipModel.rotation.x = THREE.MathUtils.degToRad(-8);
         shipModel.rotation.y = Math.PI;
         shipModel.rotation.z = THREE.MathUtils.degToRad(8);
-        setShipOpacity(1);
+        setShipOpacity(0);
         shipOrientationGroup.add(shipModel);
       },
       undefined,
@@ -317,16 +327,39 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       onComplete: playOutro,
     });
 
+    const startIntro = () => {
+      if (hasStartedIntroRef.current || hasStartedOutroRef.current) return;
+      hasStartedIntroRef.current = true;
+      clock.start();
+      gsap.set(introState, { shipReveal: 0, shipEntry: 0, shipBoost: 0 });
+      introTween.play(0);
+      gsap.to(introState, {
+        shipReveal: 1,
+        duration: 0.55,
+        delay: 0.5,
+        ease: "power2.out",
+      });
+      gsap.to(introState, {
+        shipEntry: 1,
+        duration: 1.2,
+        delay: 0.5,
+        ease: "power3.out",
+      });
+      gsap.to(introState, {
+        shipBoost: 1,
+        duration: 1.45,
+        delay: 0.5,
+        ease: "expo.out",
+      });
+    };
+
     loadingManager.onLoad = () => {
       if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
+      isLoadingRef.current = false;
       setIsLoading(false);
-      gsap.to(rootRef.current, {
-        autoAlpha: 1,
-        duration: 0.4,
-        ease: "power1.out",
-      });
-      clock.start();
-      introTween.play(0);
+      hasAssetsReady = true;
+      updateCameraPercentage(0);
+      gsap.set(rootRef.current, { autoAlpha: 1 });
     };
 
     let frameId = 0;
@@ -341,7 +374,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       camera.rotation.y += (cameraRotationProxyX - camera.rotation.y) / 15;
       camera.rotation.x += (cameraRotationProxyY - camera.rotation.x) / 15;
 
-      const shipProgress = Math.min(currentCameraPercentage + 0.045, 0.985);
+      const shipPathOffset = THREE.MathUtils.lerp(0.24, 0.045, introState.shipBoost);
+      const shipProgress = Math.min(currentCameraPercentage + shipPathOffset, 0.985);
       const shipLookAhead = Math.min(shipProgress + 0.015, 0.995);
       const tunnelProgress = THREE.MathUtils.clamp(currentCameraPercentage / 0.96, 0, 1);
       const orbitPhase = elapsed * 2.4 + tunnelProgress * Math.PI * 1.75;
@@ -355,11 +389,13 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
       const shipScale =
         shipScaleBase *
+        THREE.MathUtils.lerp(0.18, 1, introState.shipReveal) *
         THREE.MathUtils.lerp(1.28, 0.86, tunnelProgress) *
         THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2) *
         THREE.MathUtils.lerp(1, 0.015, shipExitProgress) *
         THREE.MathUtils.lerp(1, 0.03, 1 - outroState.shipOpacity);
       const shipOpacity =
+        introState.shipReveal *
         THREE.MathUtils.lerp(1, 0.22, shipExitProgress) *
         outroState.shipOpacity;
 
@@ -376,6 +412,16 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
             .multiplyScalar(Math.sin(orbitPhase) * radialDistance * 0.58)
         );
       shipPosition.copy(shipProgressPoint).add(shipOffset);
+      camera.getWorldDirection(cameraForward);
+      shipEntryPoint
+        .copy(c.position)
+        .addScaledVector(cameraForward, 10)
+        .addScaledVector(shipBinormal, tunnelRadius * 3.6)
+        .addScaledVector(shipNormal, -tunnelRadius * 2.2);
+      shipEntryBlendPosition
+        .copy(shipEntryPoint)
+        .lerp(shipPosition, introState.shipEntry);
+      shipPosition.copy(shipEntryBlendPosition);
       shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
 
       shipGroup.position.copy(shipPosition);
@@ -393,6 +439,28 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
+
+      if (hasAssetsReady && !hasRenderedReadyFrame) {
+        hasRenderedReadyFrame = true;
+        requestAnimationFrame(() => {
+          if (!loaderRef.current) {
+            setShowLoader(false);
+            startIntro();
+            return;
+          }
+
+          gsap.to(loaderRef.current, {
+            autoAlpha: 0,
+            duration: 0.45,
+            ease: "power2.out",
+            onComplete: () => {
+              setShowLoader(false);
+              startIntro();
+            },
+          });
+        });
+      }
+
       frameId = requestAnimationFrame(render);
     };
     render();
@@ -449,19 +517,21 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
   return (
     <>
-      {isLoading && (
-        <div className="fixed inset-0 z-20 bg-black">
+      {showLoader && (
+        <div
+          ref={loaderRef}
+          className="fixed inset-0 z-20 bg-black">
           <LoadingPage />
         </div>
       )}
       <div
         ref={rootRef}
         className="fixed inset-0 z-10 opacity-0">
-      <canvas
-        ref={canvasRef}
-        className="experience absolute inset-0 h-screen w-full"
-      />
-      <div className="scrollTarget absolute top-0 z-0 w-24"></div>
+        <canvas
+          ref={canvasRef}
+          className="experience absolute inset-0 h-screen w-full"
+        />
+        <div className="scrollTarget absolute top-0 z-0 w-24"></div>
       </div>
     </>
   );
