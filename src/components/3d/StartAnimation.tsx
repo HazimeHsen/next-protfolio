@@ -258,10 +258,10 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         rootRef.current,
         {
           autoAlpha: 0,
-          duration: 0.45,
+          duration: 0.22,
           ease: "power1.inOut",
         },
-        0.56
+        0
       );
     };
     playOutroRef.current = playOutro;
