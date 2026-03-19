@@ -48,6 +48,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   isLoading,
   setIsLoading,
 }) => {
+  const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLoadingRef = useRef(isLoading);
   const hasCompletedIntroRef = useRef(false);
@@ -76,7 +77,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!rootRef.current || !canvasRef.current) return;
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -197,7 +198,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(ambientLight);
 
     let shipModel: THREE.Object3D | null = null;
-    const outroState = { progress: 0, tunnelOpacity: 1 };
+    const outroState = { shipOpacity: 1 };
 
     const setShipOpacity = (opacity: number) => {
       if (!shipModel) return;
@@ -236,33 +237,20 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       outroTimeline.to(
         outroState,
         {
-          progress: 1,
-          duration: 1.2,
+          shipOpacity: 0,
+          duration: 0.7,
         },
         0
       );
 
       outroTimeline.to(
-        outroState,
-        {
-          tunnelOpacity: 0,
-          duration: 1.05,
-          onUpdate: () => {
-            light.intensity = 0.35 * outroState.tunnelOpacity;
-            ambientLight.intensity = 0.8 * outroState.tunnelOpacity;
-          },
-        },
-        1.15
-      );
-
-      outroTimeline.to(
-        canvasRef.current,
+        rootRef.current,
         {
           autoAlpha: 0,
-          duration: 0.7,
+          duration: 0.45,
           ease: "power1.inOut",
         },
-        2
+        0.56
       );
     };
     playOutroRef.current = playOutro;
@@ -364,10 +352,10 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         THREE.MathUtils.lerp(1.28, 0.86, tunnelProgress) *
         THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2) *
         THREE.MathUtils.lerp(1, 0.015, shipExitProgress) *
-        THREE.MathUtils.lerp(1, 0.03, outroState.progress);
+        THREE.MathUtils.lerp(1, 0.03, 1 - outroState.shipOpacity);
       const shipOpacity =
-        THREE.MathUtils.lerp(1, 0, shipExitProgress) *
-        THREE.MathUtils.lerp(1, 0, outroState.progress);
+        THREE.MathUtils.lerp(1, 0.22, shipExitProgress) *
+        outroState.shipOpacity;
 
       getFrameVectors(shipProgress);
       path.getPointAt(shipProgress, shipProgressPoint);
@@ -396,10 +384,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       );
       shipOrientationGroup.scale.setScalar(shipScale);
       setShipOpacity(shipOpacity);
-      material.opacity = outroState.tunnelOpacity;
-      mat.opacity = 0.14 * outroState.tunnelOpacity;
-      material.needsUpdate = true;
-      mat.needsUpdate = true;
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
@@ -458,15 +442,15 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   }, [onFadeOutComplete, setIsLoading]);
 
   return (
-    <>
+    <div
+      ref={rootRef}
+      className={`fixed inset-0 z-10 ${isLoading ? "opacity-0" : "opacity-100"}`}>
       <canvas
         ref={canvasRef}
-        className={`experience fixed top-0 left-0 w-full h-screen z-10 transition-opacity duration-300 ${
-          isLoading ? "opacity-0" : "opacity-100"
-        }`}
+        className="experience absolute inset-0 h-screen w-full"
       />
-      <div className="scrollTarget absolute w-24 top-0 z-0"></div>
-    </>
+      <div className="scrollTarget absolute top-0 z-0 w-24"></div>
+    </div>
   );
 };
 
