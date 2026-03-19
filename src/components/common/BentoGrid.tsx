@@ -61,7 +61,7 @@ export const BentoGrid = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 md:grid-cols-3 gap-4 max-w-7xl mx-auto",
+        "grid auto-rows-fr grid-cols-1 md:grid-cols-3 gap-4 max-w-7xl mx-auto",
         className
       )}>
       {children}
@@ -87,21 +87,22 @@ export const BentoGridItem = ({
   return (
     <BlurFade
       delay={index * 0.1}
-      className={className}>
-      <HoverGlow className="row-span-1 rounded-[8px] p-[2px]">
+      className={cn("h-full", className)}>
+      <HoverGlow className="row-span-1 h-full rounded-[8px] p-[2px]">
         <TransitionLink
-          className="radial-gradient relative flex h-full flex-col justify-between space-y-4 rounded-[6px] border-2 border-zinc-800 p-4"
+          className="radial-gradient relative flex h-full flex-col overflow-hidden rounded-[6px] border-2 border-zinc-800"
           href={link}>
-          <div className="relative flex h-[165px] w-full flex-1 overflow-hidden rounded-[6px] border-2 border-zinc-800 bg-black">
+          <div className="relative block h-[150px] min-h-[150px] w-full shrink-0 overflow-hidden bg-black md:h-[160px] md:min-h-[160px]">
             <Image
               alt={"image " + title}
               src={images[0]}
               fill
               quality={100}
-              className="object-cover transition duration-500 hover:scale-[1.03]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover"
             />
           </div>
-          <div className="transition duration-200">
+          <div className="p-4 transition duration-200">
             <div className="mb-1 mt-2 font-sans font-bold text-neutral-200">
               {title}
             </div>

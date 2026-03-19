@@ -22,37 +22,36 @@ const ProjectsHero = () => {
 
 const Cards = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const duplicatedProjects = Array.from({ length: 3 }, (_, duplicateIndex) =>
+    projects.flatMap((project) => {
+      const image = project.images[0];
+
+      if (!image) {
+        return [];
+      }
+
+      return {
+        key: `${project.id}-primary-${duplicateIndex}`,
+        src: image,
+        alt: `${project.title} Image 1`,
+      };
+    })
+  ).flat();
 
   return (
     <div className="absolute inset-0 z-10" ref={containerRef}>
-      {projects.flatMap((project) =>
-        project.images.map((image, index) => (
-          <Card
-            key={`${project.id}-${index}`}
-            containerRef={containerRef}
-            src={image}
-            alt={`${project.title} Image ${index + 1}`}
-            rotate={`${Math.random() * 20 - 10}deg`}
-            top={`${Math.random() * 80}%`}
-            left={`${Math.random() * 80}%`}
-            className="w-36 md:w-56"
-          />
-        ))
-      )}
-      {projects.flatMap((project) =>
-        project.images.map((image, index) => (
-          <Card
-            key={`${project.id}-${index}`}
-            containerRef={containerRef}
-            src={image}
-            alt={`${project.title} Image ${index + 1}`}
-            rotate={`${Math.random() * 20 - 10}deg`}
-            top={`${Math.random() * 80}%`}
-            left={`${Math.random() * 80}%`}
-            className="w-36 md:w-56"
-          />
-        ))
-      )}
+      {duplicatedProjects.map((project) => (
+        <Card
+          key={project.key}
+          containerRef={containerRef}
+          src={project.src}
+          alt={project.alt}
+          rotate={`${Math.random() * 20 - 10}deg`}
+          top={`${Math.random() * 80}%`}
+          left={`${Math.random() * 80}%`}
+          className="w-36 md:w-56"
+        />
+      ))}
     </div>
   );
 };
