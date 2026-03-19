@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import {
   CatmullRomCurve3,
   TubeGeometry,
@@ -16,10 +17,10 @@ import {
   LineSegments,
   Fog,
   TextureLoader,
+  LoadingManager,
 } from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SpaceShip from "./SpaceShipe/SpaceShip";
 
 const points = [
   [10, 89, 0],
@@ -48,7 +49,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   setIsLoading,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [showSpaceShip, setShowSpaceShip] = useState(true);
   const isLoadingRef = useRef(isLoading);
   const hasCompletedIntroRef = useRef(false);
 
@@ -61,7 +61,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       if (hasCompletedIntroRef.current) return;
       hasCompletedIntroRef.current = true;
       setIsLoading(false);
-      setShowSpaceShip(false);
       onFadeOutComplete();
     }, 12000);
 
@@ -115,7 +114,29 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
 
-    const textureLoader = new TextureLoader();
+    const tunnelRadius = 4;
+    const loadingManager = new LoadingManager();
+    const textureLoader = new TextureLoader(loadingManager);
+    const gltfLoader = new GLTFLoader(loadingManager);
+    const clock = new THREE.Clock();
+    const frenetFrames = path.computeFrenetFrames(300, false);
+    const shipGroup = new Group();
+    const shipOrientationGroup = new Group();
+    const shipOffset = new Vector3();
+    const shipProgressPoint = new Vector3();
+    const shipLookAheadPoint = new Vector3();
+    const shipPosition = new Vector3();
+    const shipLookDirection = new Vector3();
+    const shipNormal = new Vector3();
+    const shipBinormal = new Vector3();
+    const shipBinormalOffset = new Vector3();
+    const shipLookTarget = new Vector3();
+    const shipMobileScale = 0.12;
+    const shipDesktopScale = 0.16;
+
+    scene.add(shipGroup);
+    shipGroup.add(shipOrientationGroup);
+
     const texture = textureLoader.load(
       "/3d/start-sphere/3d_space_5.jpg"
     );
@@ -139,11 +160,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       specular: 0x000000,
     });
 
-    const tubeGeometry = new TubeGeometry(path, 300, 4, 32, false);
+    const tubeGeometry = new TubeGeometry(path, 300, tunnelRadius, 32, false);
     const tube = new THREE.Mesh(tubeGeometry, material);
     scene.add(tube);
 
-    const innerTubeGeometry = new TubeGeometry(path, 150, 3.4, 32, false);
+    const innerTubeGeometry = new TubeGeometry(path, 150, tunnelRadius - 0.6, 32, false);
     const geo = new EdgesGeometry(innerTubeGeometry);
     const mat = new LineBasicMaterial({
       linewidth: 2,
@@ -156,6 +177,46 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const light = new PointLight(0xffffff, 0.35, 4, 0);
     light.castShadow = true;
     scene.add(light);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    let shipModel: THREE.Object3D | null = null;
+
+    const getFrameVectors = (progress: number) => {
+      const normalized = THREE.MathUtils.euclideanModulo(progress, 1);
+      const frameIndexFloat = normalized * frenetFrames.tangents.length;
+      const frameIndex = Math.floor(frameIndexFloat) % frenetFrames.tangents.length;
+      const nextFrameIndex = (frameIndex + 1) % frenetFrames.tangents.length;
+      const frameAlpha = frameIndexFloat - frameIndex;
+
+      shipNormal
+        .copy(frenetFrames.normals[frameIndex])
+        .lerp(frenetFrames.normals[nextFrameIndex], frameAlpha)
+        .normalize();
+      shipBinormal
+        .copy(frenetFrames.binormals[frameIndex])
+        .lerp(frenetFrames.binormals[nextFrameIndex], frameAlpha)
+        .normalize();
+    };
+
+    gltfLoader.load(
+      "/3d/space_ship_wg-02/space_ship.gltf",
+      (gltf) => {
+        shipModel = gltf.scene;
+        const bbox = new THREE.Box3().setFromObject(shipModel);
+        const center = bbox.getCenter(new Vector3());
+        shipModel.position.sub(center);
+        shipModel.rotation.x = THREE.MathUtils.degToRad(-8);
+        shipModel.rotation.y = Math.PI;
+        shipModel.rotation.z = THREE.MathUtils.degToRad(8);
+        shipOrientationGroup.add(shipModel);
+      },
+      undefined,
+      () => {
+        shipModel = null;
+      }
+    );
 
     const updateCameraPercentage = (percentage: number) => {
       const p1 = path.getPointAt(percentage % 1);
@@ -175,6 +236,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       percent: 0.96,
       duration: 5,
       ease: "linear",
+      paused: true,
       onUpdate: () => {
         cameraTargetPercentage = tubePerc.percent;
       },
@@ -190,15 +252,63 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       },
     });
 
+    loadingManager.onLoad = () => {
+      if (hasCompletedIntroRef.current) return;
+      setIsLoading(false);
+      clock.start();
+      introTween.play(0);
+    };
+
     let frameId = 0;
     const render = () => {
       if (isLoadingRef.current) {
         frameId = requestAnimationFrame(render);
         return;
       }
+
+      const elapsed = clock.getElapsedTime();
       currentCameraPercentage = cameraTargetPercentage;
       camera.rotation.y += (cameraRotationProxyX - camera.rotation.y) / 15;
       camera.rotation.x += (cameraRotationProxyY - camera.rotation.x) / 15;
+
+      const shipProgress = Math.min(currentCameraPercentage + 0.045, 0.985);
+      const shipLookAhead = Math.min(shipProgress + 0.015, 0.995);
+      const tunnelProgress = THREE.MathUtils.clamp(currentCameraPercentage / 0.96, 0, 1);
+      const orbitPhase = elapsed * 2.4 + tunnelProgress * Math.PI * 1.75;
+      const radialDistance = tunnelRadius * 0.26;
+      const shipScaleBase =
+        window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
+      const shipScale =
+        shipScaleBase *
+        THREE.MathUtils.lerp(1.28, 0.86, tunnelProgress) *
+        THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2);
+
+      getFrameVectors(shipProgress);
+      path.getPointAt(shipProgress, shipProgressPoint);
+      path.getPointAt(shipLookAhead, shipLookAheadPoint);
+
+      shipOffset
+        .copy(shipNormal)
+        .multiplyScalar(Math.cos(orbitPhase) * radialDistance)
+        .add(
+          shipBinormalOffset
+            .copy(shipBinormal)
+            .multiplyScalar(Math.sin(orbitPhase) * radialDistance * 0.58)
+        );
+      shipPosition.copy(shipProgressPoint).add(shipOffset);
+      shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
+
+      shipGroup.position.copy(shipPosition);
+      shipLookTarget.copy(shipPosition).add(shipLookDirection);
+      shipOrientationGroup.lookAt(shipLookTarget);
+      shipOrientationGroup.rotateY(Math.PI);
+      shipOrientationGroup.rotateX(
+        THREE.MathUtils.degToRad(-6) + Math.sin(elapsed * 2.2) * 0.08
+      );
+      shipOrientationGroup.rotateZ(
+        Math.cos(orbitPhase) * 0.18 + THREE.MathUtils.degToRad(6)
+      );
+      shipOrientationGroup.scale.setScalar(shipScale);
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
@@ -226,6 +336,21 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       scene.remove(tube);
       scene.remove(wireframe);
       scene.remove(light);
+      scene.remove(ambientLight);
+      scene.remove(shipGroup);
+      shipOrientationGroup.clear();
+      if (shipModel) {
+        shipModel.traverse((child) => {
+          if (!(child instanceof THREE.Mesh)) return;
+          child.geometry?.dispose();
+          const material = child.material;
+          if (Array.isArray(material)) {
+            material.forEach((item) => item.dispose());
+          } else {
+            material?.dispose();
+          }
+        });
+      }
       tubeGeometry.dispose();
       innerTubeGeometry.dispose();
       geo.dispose();
@@ -237,7 +362,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       renderer.dispose();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [onFadeOutComplete]);
+  }, [onFadeOutComplete, setIsLoading]);
 
   return (
     <>
@@ -248,13 +373,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         }`}
       />
       <div className="scrollTarget absolute w-24 top-0 z-0"></div>
-      {showSpaceShip && (
-        <SpaceShip
-          setShowSpaceShip={setShowSpaceShip}
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
-        />
-      )}
     </>
   );
 };
