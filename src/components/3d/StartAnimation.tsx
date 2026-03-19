@@ -19,6 +19,7 @@ import {
   Fog,
   TextureLoader,
   LoadingManager,
+  QuadraticBezierCurve3,
 } from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -84,12 +85,17 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     renderer.setSize(ww, wh);
 
     const scene = new THREE.Scene();
-    scene.fog = new Fog(0x03050b, 0, 100);
+    // Fog starts dense — lifts as ship enters
+    const fog = new Fog(0x03050b, 0, 100);
+    scene.fog = fog;
 
     let cameraRotationProxyX = 3.14159;
     let cameraRotationProxyY = 0;
 
-    const camera = new THREE.PerspectiveCamera(45, ww / wh, 0.001, 200);
+    // ── FOV breathe: start wide, settle to 45 as ship arrives ────────────────
+    const BASE_FOV = 45;
+    const ENTRY_FOV = 58; // slightly wide on arrival, eases back to BASE_FOV
+    const camera = new THREE.PerspectiveCamera(ENTRY_FOV, ww / wh, 0.001, 200);
     camera.rotation.y = cameraRotationProxyX;
     camera.rotation.z = cameraRotationProxyY;
 
@@ -98,9 +104,13 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(c);
 
     const renderScene = new RenderPass(scene, camera);
+
+    // ── Bloom: starts boosted, settles to base ────────────────────────────────
+    const BASE_BLOOM  = 1.5;
+    const ENTRY_BLOOM = 2.8;
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(ww, wh),
-      1.5,
+      ENTRY_BLOOM, // start hot
       0.4,
       0.85
     );
@@ -193,17 +203,21 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     let shipModel: THREE.Object3D | null = null;
 
-    // ── Animation state ───────────────────────────────────────────────────────
-    // reveal  : 0→1  opacity fade-in as ship enters frame
-    // boost   : 0→1  path offset shrinks — ship rushes from deep behind into slot
-    // entry   : 0→1  position lerp from spawn → orbit
-    // tilt    : 0→1→0 dramatic nose-up pitch + roll on the climb arc
     const shipState = {
       reveal: 0,
       boost: 0,
-      entry: 0,
+      entry: 0,  // 0→1 drives position along the bezier arc
       tilt: 0,
     };
+
+    // Reusable bezier arc — rebuilt each frame during entry since spawn/target
+    // move with the camera. Declared here to avoid GC pressure.
+    const bezierArc = new QuadraticBezierCurve3(
+      new Vector3(),
+      new Vector3(),
+      new Vector3()
+    );
+    const bezierPoint = new Vector3();
 
     const outroState = { progress: 0 };
 
@@ -240,15 +254,15 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
       const tl = gsap.timeline({ onComplete: finishIntro });
 
+      // Camera rushes forward
       tl.to(camProxy, {
         value: Math.min(outroStartPercent + 0.18, 0.999),
         duration: 0.55,
         ease: "power3.in",
-        onUpdate: () => {
-          cameraTargetPercentage = camProxy.value;
-        },
+        onUpdate: () => { cameraTargetPercentage = camProxy.value; },
       }, 0);
 
+      // FOV punches wide — warp sensation
       tl.to(camera, {
         fov: 75,
         duration: 0.55,
@@ -256,6 +270,14 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         onUpdate: () => { camera.updateProjectionMatrix(); },
       }, 0);
 
+      // Bloom flares on exit
+      tl.to(bloomPass, {
+        strength: 3.2,
+        duration: 0.55,
+        ease: "power3.in",
+      }, 0);
+
+      // Canvas fades after zoom has been visible for 0.25 s
       tl.to(rootRef.current, {
         autoAlpha: 0,
         duration: 0.3,
@@ -349,22 +371,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       onUpdate: () => { cameraTargetPercentage = tubePerc.percent; },
     });
 
-    // ── Cinematic bottom-launch entry ─────────────────────────────────────────
-    //
-    // The ship spawns BELOW and BEHIND the camera view — completely out of frame.
-    // It then:
-    //   1. Appears tiny (boost=0 → small scale, reveal=0 → invisible)
-    //   2. Accelerates upward into frame (entry 0→1 via expo.out)
-    //   3. Simultaneously rushes forward from far-behind into formation (boost 0→1)
-    //   4. Pitches nose-up dramatically on the climb (tilt 0→1→0)
-    //   5. Settles into normal orbital cruise
-    //
-    // Spawn geometry (in render loop):
-    //   - spawnDepth : pushed FORWARD along camera direction (so it's in front,
-    //                  not behind the near clip plane, but still "behind" visually
-    //                  because boost=0 puts it far ahead on the path)
-    //   - spawnDown  : pushed DOWN along -cameraUp so it's below the screen edge
-    //   - spawnBack  : slight back-offset on binormal for a diagonal feel
     const startIntro = () => {
       if (
         hasStartedIntroRef.current ||
@@ -377,15 +383,40 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
       introTween.play(0);
 
-      // Fade in once ship starts entering frame (~0.3s into entry arc)
-      gsap.to(shipState, {
-        reveal: 1,
-        duration: 0.5,
-        delay: 0.6,          // slight delay so first frame is fully off-screen
+      // ── FOV: ease from wide back to base — "settling in" feel ────────────
+      gsap.to(camera, {
+        fov: BASE_FOV,
+        duration: 1.8,
+        delay: 0.5,
+        ease: "power2.out",
+        onUpdate: () => { camera.updateProjectionMatrix(); },
+      });
+
+      // ── Fog: lift from dense (100) to open (160) as ship arrives ─────────
+      gsap.to(fog, {
+        far: 160,
+        duration: 2.0,
+        delay: 0.5,
         ease: "power2.out",
       });
 
-      // Boost: expo.out — instant burst of acceleration from deep-behind into slot
+      // ── Bloom: settle from entry flash down to base ───────────────────────
+      gsap.to(bloomPass, {
+        strength: BASE_BLOOM,
+        duration: 1.6,
+        delay: 0.5,
+        ease: "power3.out",
+      });
+
+      // Ship fades in once it's already rising into frame
+      gsap.to(shipState, {
+        reveal: 1,
+        duration: 0.5,
+        delay: 0.6,
+        ease: "power2.out",
+      });
+
+      // Boost: expo.out — instant burst then eases into formation
       gsap.to(shipState, {
         boost: 1,
         duration: 1.8,
@@ -393,8 +424,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         ease: "expo.out",
       });
 
-      // Entry: ship travels from below-screen spawn to its orbit
-      // power4.out = very fast initial velocity, then eases into position
+      // Entry: drives position along the bezier arc (0→1)
+      // power4.out = aggressive initial velocity then snaps into orbit
       gsap.to(shipState, {
         entry: 1,
         duration: 1.5,
@@ -402,8 +433,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         ease: "power4.out",
       });
 
-      // Tilt: nose pitches UP hard on launch, then levels to cruise
-      // Peak at tilt=1 then smoothly unwinds — gives a fighter-jet launch feel
+      // Tilt: nose pitches hard up on launch, levels to cruise
       gsap.to(shipState, {
         tilt: 1,
         duration: 0.5,
@@ -503,7 +533,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       path.getPointAt(shipProgress, shipProgressPoint);
       path.getPointAt(shipLookAhead, shipLookAheadPoint);
 
-      // Orbital wobble in cruise
+      // Orbital wobble (cruise)
       shipOffset
         .copy(shipNormal)
         .multiplyScalar(Math.cos(orbitPhase) * radialDistance)
@@ -512,36 +542,60 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
             .copy(shipBinormal)
             .multiplyScalar(Math.sin(orbitPhase) * radialDistance * 0.58)
         );
-      shipPosition.copy(shipProgressPoint).add(shipOffset);
 
-      // ── Spawn point: directly below the camera view ───────────────────────
-      // We use camera's actual world-up so "below" is always screen-bottom
-      // regardless of tunnel orientation.
+      // ── Cruise target position (orbit around path) ────────────────────────
+      const cruiseTarget = shipProgressPoint.clone().add(shipOffset);
+
+      // ── Spawn point: below and behind the camera ──────────────────────────
       camera.getWorldDirection(cameraForward);
-
-      // cameraUp: world up projected perpendicular to forward — true screen-up
       cameraUp.set(0, 1, 0);
       cameraUp
         .addScaledVector(cameraForward, -cameraUp.dot(cameraForward))
         .normalize();
 
-      // Spawn geometry:
-      //   8 units forward  → safely in front of near clip, visually "below"
-      //   8 × tunnelRadius down → well below the screen edge
-      //   1 × tunnelRadius sideways → slight diagonal, not dead-centre boring
-      const spawnForward  = 8;
-      const spawnDown     = tunnelRadius * 8.0;   // far below screen
-      const spawnSide     = tunnelRadius * 1.2;   // slight diagonal offset
-
       const spawnPoint = new Vector3()
         .copy(c.position)
-        .addScaledVector(cameraForward,  spawnForward)
-        .addScaledVector(cameraUp,      -spawnDown)   // negative = downward
-        .addScaledVector(shipBinormal,   spawnSide);
+        .addScaledVector(cameraForward,  8)
+        .addScaledVector(cameraUp,      -tunnelRadius * 8.0)
+        .addScaledVector(shipBinormal,   tunnelRadius * 1.2);
 
-      // entry=0 → spawn point (below screen)
-      // entry=1 → orbital position (normal cruise)
-      shipPosition.lerpVectors(spawnPoint, shipPosition, shipState.entry);
+      // ── Bezier arc mid-point ──────────────────────────────────────────────
+      // The control point sits halfway between spawn and cruise, offset
+      // forward and slightly upward — creates a natural sweeping arc
+      // instead of a straight-line lerp. As entry goes 0→1 the ship traces
+      // this curve, giving it realistic curved flight-path momentum.
+      const midPoint = new Vector3()
+        .addVectors(spawnPoint, cruiseTarget)
+        .multiplyScalar(0.5)
+        .addScaledVector(cameraForward,  tunnelRadius * 2.5)  // arc bows forward
+        .addScaledVector(cameraUp,       tunnelRadius * 1.5); // arc bows upward
+
+      // Rebuild bezier with current spawn/cruise (they move with camera)
+      bezierArc.v0.copy(spawnPoint);
+      bezierArc.v1.copy(midPoint);
+      bezierArc.v2.copy(cruiseTarget);
+
+      if (shipState.entry < 1) {
+        // Sample the arc at the current entry progress
+        bezierArc.getPoint(shipState.entry, bezierPoint);
+        shipPosition.copy(bezierPoint);
+      } else {
+        // Fully arrived — use cruise position directly
+        shipPosition.copy(cruiseTarget);
+      }
+
+      // ── Better cruise drift: two-frequency sinusoidal float ──────────────
+      // Primary: fast orbit (existing)
+      // Secondary: slow gravitational drift — gives the ship real weight
+      const driftY = Math.sin(elapsed * 0.7)  * radialDistance * 0.3;
+      const driftX = Math.cos(elapsed * 0.45) * radialDistance * 0.18;
+
+      if (shipState.entry >= 1) {
+        // Only apply drift once fully in orbit — no fighting the arc
+        shipPosition
+          .addScaledVector(cameraUp,      driftY)
+          .addScaledVector(shipBinormal,  driftX);
+      }
 
       // ── Ship orientation ──────────────────────────────────────────────────
       shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
@@ -550,21 +604,23 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       shipOrientationGroup.lookAt(shipLookTarget);
       shipOrientationGroup.rotateY(Math.PI);
 
-      // Base pitch + gentle breathing
+      // Base pitch + fast breathing
       shipOrientationGroup.rotateX(
         THREE.MathUtils.degToRad(-6) + Math.sin(elapsed * 2.2) * 0.08
       );
 
-      // Cruise roll (orbital wobble)
+      // Cruise roll
       const cruiseRoll =
         Math.cos(orbitPhase) * 0.18 + THREE.MathUtils.degToRad(6);
 
-      // Entry: nose pitches UP hard (negative X = nose-up in local space)
-      // and rolls slightly as it arcs into position
-      const entryPitch = shipState.tilt * THREE.MathUtils.degToRad(-42); // nose-up launch
-      const entryRoll  = shipState.tilt * THREE.MathUtils.degToRad(28);  // banking arc
+      // Entry: nose-up pitch hard on launch, banks as it arcs
+      const entryPitch = shipState.tilt * THREE.MathUtils.degToRad(-42);
+      const entryRoll  = shipState.tilt * THREE.MathUtils.degToRad(28);
 
-      shipOrientationGroup.rotateZ(cruiseRoll + entryRoll);
+      // Drift roll: ship leans slightly into the slow gravitational drift
+      const driftRoll = Math.cos(elapsed * 0.45) * 0.06;
+
+      shipOrientationGroup.rotateZ(cruiseRoll + entryRoll + driftRoll);
       shipOrientationGroup.rotateX(entryPitch);
 
       shipOrientationGroup.scale.setScalar(shipScale);
@@ -594,6 +650,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       introTween.kill();
       gsap.killTweensOf(shipState);
       gsap.killTweensOf(outroState);
+      gsap.killTweensOf(camera);
+      gsap.killTweensOf(bloomPass);
+      gsap.killTweensOf(fog);
       if (frameId) cancelAnimationFrame(frameId);
       scene.remove(tube);
       scene.remove(wireframe);
