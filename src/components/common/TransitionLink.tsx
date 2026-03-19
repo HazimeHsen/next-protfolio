@@ -1,6 +1,6 @@
 "use client";
 import Link, { LinkProps } from "next/link";
-import React, { Reference } from "react";
+import React, { Reference, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 interface TransitionLinkProps extends LinkProps {
@@ -15,6 +15,8 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const EXIT_DURATION_MS = 450;
+
 export const TransitionLink: React.FC<TransitionLinkProps> = ({
   children,
   href,
@@ -26,25 +28,46 @@ export const TransitionLink: React.FC<TransitionLinkProps> = ({
 }) => {
   const router = useRouter();
   const currentPath = usePathname();
+  const isTransitioningRef = useRef(false);
+
+  useEffect(() => {
+    document.body.classList.remove("page-transition");
+    isTransitioningRef.current = false;
+  }, [currentPath]);
 
   const handleTransition = async (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
+    if (
+      e.defaultPrevented ||
+      e.button !== 0 ||
+      e.metaKey ||
+      e.ctrlKey ||
+      e.shiftKey ||
+      e.altKey ||
+      target === "_blank"
+    ) {
+      return;
+    }
+
     e.preventDefault();
 
-    if (currentPath !== href) {
-      const body = document.querySelector("body");
-
-      body?.classList.add("page-transition");
-
-      await sleep(800);
+    if (currentPath === href) {
       router.push(href as string);
-      await sleep(800);
-
-      body?.classList.remove("page-transition");
-    } else {
-      router.push(href as string);
+      return;
     }
+
+    if (isTransitioningRef.current) {
+      return;
+    }
+
+    const body = document.body;
+
+    isTransitioningRef.current = true;
+    body.classList.add("page-transition");
+
+    await sleep(EXIT_DURATION_MS);
+    router.push(href as string);
   };
 
   return (
