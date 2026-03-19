@@ -57,11 +57,21 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   const controls = useAnimation();
   const [ref, inView] = useInView({
     triggerOnce: true,
+    threshold: 0.85,
+    rootMargin: "0px 0px -40px 0px",
   });
   const [showBorderGlow, setShowBorderGlow] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const isMobile = useMediaQuery({ maxWidth: 639 });
+
+  const backgroundGradient = useMotionTemplate`
+    radial-gradient(
+      ${showBorderGlow ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+      var(--primary),
+      transparent 80%
+    )
+  `;
 
   useEffect(() => {
     if (inView) {
@@ -133,18 +143,8 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
           variants={index % 2 === 0 && !isMobile ? slideFromLeft : slideFromRight}
           onMouseMove={handleBorderGlowMove}
           onMouseEnter={() => setShowBorderGlow(true)}
-          onMouseLeave={() => {
-            setShowBorderGlow(false);
-          }}
-          style={{
-            background: useMotionTemplate`
-              radial-gradient(
-                ${showBorderGlow ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
-                var(--primary),
-                transparent 80%
-              )
-            `,
-          }}
+          onMouseLeave={() => setShowBorderGlow(false)}
+          style={{ background: backgroundGradient }}
           className="sm:w-[calc(50%-2.25rem)] ml-10 md:mr-0 mr-3 sm:ml-0 max-w-[28rem] p-[2px] rounded-md relative transition duration-300 group/experience"
         >
           <div className="radial-gradient border-zinc-800 border-2 rounded-[6px] px-4 py-2 relative h-full">
@@ -165,7 +165,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             <div className="text-zinc-500 flex flex-col">
               <span className="text-white font-semibold">
                 {experience.subtitle}
-              </span>{" "}
+              </span>
               <span className="text-xs">{experience.title}</span>
             </div>
             {experience.highlights?.length ? (

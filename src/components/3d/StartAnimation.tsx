@@ -52,7 +52,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   const rootRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isLoadingRef = useRef(isLoading);
+
   const hasCompletedIntroRef = useRef(false);
   const hasStartedOutroRef = useRef(false);
   const hasStartedIntroRef = useRef(false);
@@ -60,24 +60,12 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   const finishIntroRef = useRef<(() => void) | null>(null);
   const [showLoader, setShowLoader] = useState(true);
 
-  useEffect(() => {
-    isLoadingRef.current = isLoading;
-  }, [isLoading]);
-
+  // Hard safety net — if nothing works after 10s, just proceed
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
-      if (playOutroRef.current && !isLoadingRef.current) {
-        playOutroRef.current();
-        return;
-      }
-
       finishIntroRef.current?.();
-    }, 12000);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
+    }, 10000);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -107,13 +95,14 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     camera.rotation.z = cameraRotationProxyY;
 
     const c = new Group();
-    c.position.z = 400;
+    // ── Start at z=0 on the path, NOT z=400 ──────────────────────────────────
+    c.position.set(10, 89, 0);
     c.add(camera);
     scene.add(c);
 
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      new THREE.Vector2(ww, wh),
       1.5,
       0.4,
       0.85
@@ -121,7 +110,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     bloomPass.renderToScreen = true;
 
     const composer = new EffectComposer(renderer);
-    composer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(ww, wh);
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
 
@@ -129,7 +118,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const loadingManager = new LoadingManager();
     const textureLoader = new TextureLoader(loadingManager);
     const gltfLoader = new GLTFLoader(loadingManager);
+
+    // Clock always running from mount
     const clock = new THREE.Clock();
+    clock.start();
+
     const frenetFrames = path.computeFrenetFrames(300, false);
     const shipGroup = new Group();
     const shipOrientationGroup = new Group();
@@ -151,21 +144,40 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(shipGroup);
     shipGroup.add(shipOrientationGroup);
 
+    // ── Track texture/gltf loading independently ──────────────────────────────
+    let texturesReady = false;
+    let gltfAttempted = false; // true whether load succeeded or failed
+    let introStartScheduled = false;
+
+    const checkAndTriggerReady = () => {
+      // We're ready once textures are done AND gltf has been attempted (pass or fail)
+      if (!texturesReady || !gltfAttempted) return;
+      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
+
+      setIsLoading(false);
+      updateCameraPercentage(0);
+      gsap.set(rootRef.current, { autoAlpha: 1 });
+    };
+
     const texture = textureLoader.load(
-      "/3d/start-sphere/space-tunnel-texture.png"
+      "/3d/start-sphere/space-tunnel-texture.png",
+      () => { /* loaded via manager */ },
+      undefined,
+      () => { /* error — manager still fires onLoad for other assets */ }
     );
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.offset.set(0, 0);
     texture.repeat.set(15, 2);
 
     const mapHeight = textureLoader.load(
-      "/3d/start-sphere/space-tunnel-bump.png"
+      "/3d/start-sphere/space-tunnel-bump.png",
+      () => { /* loaded via manager */ },
+      undefined,
+      () => { /* error — continue anyway */ }
     );
     mapHeight.anisotropy = renderer.capabilities.getMaxAnisotropy();
     mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
-    mapHeight.offset.set(0, 0);
     mapHeight.repeat.set(15, 2);
 
     const material = new MeshPhongMaterial({
@@ -186,7 +198,13 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const tube = new THREE.Mesh(tubeGeometry, material);
     scene.add(tube);
 
-    const innerTubeGeometry = new TubeGeometry(path, 150, tunnelRadius - 0.6, 32, false);
+    const innerTubeGeometry = new TubeGeometry(
+      path,
+      150,
+      tunnelRadius - 0.6,
+      32,
+      false
+    );
     const geo = new EdgesGeometry(innerTubeGeometry);
     const mat = new LineBasicMaterial({
       linewidth: 2,
@@ -198,7 +216,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(wireframe);
 
     const light = new PointLight(0xffffff, 0.35, 4, 0);
-    light.castShadow = true;
     scene.add(light);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -207,22 +224,19 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     let shipModel: THREE.Object3D | null = null;
     const introState = { shipReveal: 0, shipEntry: 0, shipBoost: 0 };
     const outroState = { shipOpacity: 1 };
-    let hasAssetsReady = false;
-    let hasRenderedReadyFrame = false;
 
     const setShipOpacity = (opacity: number) => {
       if (!shipModel) return;
       shipModel.traverse((child) => {
         if (!(child instanceof THREE.Mesh)) return;
-        const materials = Array.isArray(child.material)
+        const mats = Array.isArray(child.material)
           ? child.material
           : [child.material];
-
-        materials.forEach((meshMaterial) => {
-          meshMaterial.transparent = true;
-          meshMaterial.opacity = opacity;
-          meshMaterial.depthWrite = opacity > 0.2;
-          meshMaterial.needsUpdate = true;
+        mats.forEach((m) => {
+          m.transparent = true;
+          m.opacity = opacity;
+          m.depthWrite = opacity > 0.2;
+          m.needsUpdate = true;
         });
       });
     };
@@ -230,7 +244,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const finishIntro = () => {
       if (hasCompletedIntroRef.current) return;
       hasCompletedIntroRef.current = true;
-      isLoadingRef.current = false;
       setIsLoading(false);
       onFadeOutComplete();
     };
@@ -240,29 +253,12 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       if (hasStartedOutroRef.current) return;
       hasStartedOutroRef.current = true;
 
-      const outroTimeline = gsap.timeline({
+      const tl = gsap.timeline({
         defaults: { ease: "power2.inOut" },
         onComplete: finishIntro,
       });
-
-      outroTimeline.to(
-        outroState,
-        {
-          shipOpacity: 0,
-          duration: 0.7,
-        },
-        0
-      );
-
-      outroTimeline.to(
-        rootRef.current,
-        {
-          autoAlpha: 0,
-          duration: 0.22,
-          ease: "power1.inOut",
-        },
-        0
-      );
+      tl.to(outroState, { shipOpacity: 0, duration: 0.7 }, 0);
+      tl.to(rootRef.current, { autoAlpha: 0, duration: 0.22, ease: "power1.inOut" }, 0);
     };
     playOutroRef.current = playOutro;
 
@@ -283,6 +279,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         .normalize();
     };
 
+    // ── GLTF: mark attempted whether it succeeds or fails ────────────────────
     gltfLoader.load(
       "/3d/space_ship_wg-02/space_ship.gltf",
       (gltf) => {
@@ -295,25 +292,32 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         shipModel.rotation.z = THREE.MathUtils.degToRad(8);
         setShipOpacity(0);
         shipOrientationGroup.add(shipModel);
+        gltfAttempted = true;
+        checkAndTriggerReady();
       },
       undefined,
       () => {
+        // Failed — but don't block the intro
         shipModel = null;
+        gltfAttempted = true;
+        checkAndTriggerReady();
       }
     );
 
     const updateCameraPercentage = (percentage: number) => {
-      const p1 = path.getPointAt(percentage % 1);
-      const p2 = path.getPointAt((percentage + 0.03) % 1);
-
+      const clamped = Math.min(Math.max(percentage, 0), 0.999);
+      const p1 = path.getPointAt(clamped);
+      const p2 = path.getPointAt(Math.min(clamped + 0.03, 0.999));
       c.position.set(p1.x, p1.y, p1.z);
       c.lookAt(p2);
       light.position.set(p2.x, p2.y, p2.z);
     };
 
+    // Initialise camera on path immediately so first frame looks correct
+    updateCameraPercentage(0);
+
     let cameraTargetPercentage = 0;
     let currentCameraPercentage = 0;
-
     const tubePerc = { percent: 0 };
 
     const introTween = gsap.to(tubePerc, {
@@ -321,56 +325,85 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       duration: 5,
       ease: "linear",
       paused: true,
-      onUpdate: () => {
-        cameraTargetPercentage = tubePerc.percent;
-      },
+      onUpdate: () => { cameraTargetPercentage = tubePerc.percent; },
       onComplete: playOutro,
     });
 
     const startIntro = () => {
-      if (hasStartedIntroRef.current || hasStartedOutroRef.current) return;
+      if (
+        hasStartedIntroRef.current ||
+        hasStartedOutroRef.current ||
+        hasCompletedIntroRef.current
+      ) return;
       hasStartedIntroRef.current = true;
-      clock.start();
+
       gsap.set(introState, { shipReveal: 0, shipEntry: 0, shipBoost: 0 });
       introTween.play(0);
-      gsap.to(introState, {
-        shipReveal: 1,
-        duration: 0.55,
-        delay: 0.5,
+
+      gsap.to(introState, { shipReveal: 1, duration: 0.55, delay: 0.5, ease: "power2.out" });
+      gsap.to(introState, { shipEntry: 1, duration: 1.2, delay: 0.5, ease: "power3.out" });
+      gsap.to(introState, { shipBoost: 1, duration: 1.45, delay: 0.5, ease: "expo.out" });
+    };
+
+    const scheduleIntroStart = () => {
+      if (introStartScheduled || hasCompletedIntroRef.current) return;
+      introStartScheduled = true;
+
+      const loader = loaderRef.current;
+      if (!loader) {
+        setShowLoader(false);
+        startIntro();
+        return;
+      }
+      gsap.to(loader, {
+        autoAlpha: 0,
+        duration: 0.45,
         ease: "power2.out",
-      });
-      gsap.to(introState, {
-        shipEntry: 1,
-        duration: 1.2,
-        delay: 0.5,
-        ease: "power3.out",
-      });
-      gsap.to(introState, {
-        shipBoost: 1,
-        duration: 1.45,
-        delay: 0.5,
-        ease: "expo.out",
+        onComplete: () => {
+          setShowLoader(false);
+          startIntro();
+        },
       });
     };
 
+    // ── loadingManager covers textures; onLoad fires when both textures done ──
     loadingManager.onLoad = () => {
-      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
-      isLoadingRef.current = false;
-      setIsLoading(false);
-      hasAssetsReady = true;
-      updateCameraPercentage(0);
-      gsap.set(rootRef.current, { autoAlpha: 1 });
+      texturesReady = true;
+      checkAndTriggerReady();
     };
 
+    // Fallback: if loadingManager never fires within 3s, force-ready anyway
+    const managerFallback = window.setTimeout(() => {
+      if (!texturesReady) {
+        texturesReady = true;
+        checkAndTriggerReady();
+      }
+    }, 3000);
+
+    // ── Render loop — ALWAYS renders, no gating ───────────────────────────────
     let frameId = 0;
+    let isReady = false; // local mirror, avoids ref reads in hot loop
+
     const render = () => {
-      if (isLoadingRef.current) {
-        frameId = requestAnimationFrame(render);
+      frameId = requestAnimationFrame(render);
+
+      // Keep checking if we've become ready this frame
+      if (!isReady) {
+        const ready =
+          texturesReady && gltfAttempted && !hasCompletedIntroRef.current;
+        if (ready) {
+          isReady = true;
+          gsap.set(rootRef.current, { autoAlpha: 1 });
+          scheduleIntroStart();
+        }
+        // Still render the tunnel even while loading so there's no freeze
+        composer.render();
         return;
       }
 
       const elapsed = clock.getElapsedTime();
       currentCameraPercentage = cameraTargetPercentage;
+
       camera.rotation.y += (cameraRotationProxyX - camera.rotation.y) / 15;
       camera.rotation.x += (cameraRotationProxyY - camera.rotation.x) / 15;
 
@@ -379,14 +412,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       const shipLookAhead = Math.min(shipProgress + 0.015, 0.995);
       const tunnelProgress = THREE.MathUtils.clamp(currentCameraPercentage / 0.96, 0, 1);
       const orbitPhase = elapsed * 2.4 + tunnelProgress * Math.PI * 1.75;
-      const shipExitProgress = THREE.MathUtils.smoothstep(
-        tunnelProgress,
-        0.91,
-        0.96
-      );
+      const shipExitProgress = THREE.MathUtils.smoothstep(tunnelProgress, 0.91, 0.96);
       const radialDistance = tunnelRadius * 0.26 * (1 - shipExitProgress * 0.92);
-      const shipScaleBase =
-        window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
+      const shipScaleBase = window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
       const shipScale =
         shipScaleBase *
         THREE.MathUtils.lerp(0.18, 1, introState.shipReveal) *
@@ -418,9 +446,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         .addScaledVector(cameraForward, 10)
         .addScaledVector(shipBinormal, tunnelRadius * 3.6)
         .addScaledVector(shipNormal, -tunnelRadius * 2.2);
-      shipEntryBlendPosition
-        .copy(shipEntryPoint)
-        .lerp(shipPosition, introState.shipEntry);
+      shipEntryBlendPosition.copy(shipEntryPoint).lerp(shipPosition, introState.shipEntry);
       shipPosition.copy(shipEntryBlendPosition);
       shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
 
@@ -439,51 +465,28 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
-
-      if (hasAssetsReady && !hasRenderedReadyFrame) {
-        hasRenderedReadyFrame = true;
-        requestAnimationFrame(() => {
-          if (!loaderRef.current) {
-            setShowLoader(false);
-            startIntro();
-            return;
-          }
-
-          gsap.to(loaderRef.current, {
-            autoAlpha: 0,
-            duration: 0.45,
-            ease: "power2.out",
-            onComplete: () => {
-              setShowLoader(false);
-              startIntro();
-            },
-          });
-        });
-      }
-
-      frameId = requestAnimationFrame(render);
     };
     render();
 
     const handleResize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
-      camera.aspect = width / height;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-      composer.setSize(width, height);
+      renderer.setSize(w, h);
+      composer.setSize(w, h);
     };
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.clearTimeout(managerFallback);
       playOutroRef.current = null;
       finishIntroRef.current = null;
       introTween.kill();
-      if (frameId) {
-        cancelAnimationFrame(frameId);
-      }
+      gsap.killTweensOf(introState);
+      gsap.killTweensOf(outroState);
+      if (frameId) cancelAnimationFrame(frameId);
       scene.remove(tube);
       scene.remove(wireframe);
       scene.remove(light);
@@ -494,12 +497,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         shipModel.traverse((child) => {
           if (!(child instanceof THREE.Mesh)) return;
           child.geometry?.dispose();
-          const material = child.material;
-          if (Array.isArray(material)) {
-            material.forEach((item) => item.dispose());
-          } else {
-            material?.dispose();
-          }
+          const m = child.material;
+          if (Array.isArray(m)) m.forEach((i) => i.dispose());
+          else m?.dispose();
         });
       }
       tubeGeometry.dispose();
@@ -511,22 +511,18 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       mapHeight.dispose();
       composer.dispose();
       renderer.dispose();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, [onFadeOutComplete, setIsLoading]);
 
   return (
     <>
       {showLoader && (
-        <div
-          ref={loaderRef}
-          className="fixed inset-0 z-20 bg-black">
+        <div ref={loaderRef} className="fixed inset-0 z-20 bg-black">
           <LoadingPage />
         </div>
       )}
-      <div
-        ref={rootRef}
-        className="fixed inset-0 z-10 opacity-0">
+      <div ref={rootRef} className="fixed inset-0 z-10 opacity-0">
         <canvas
           ref={canvasRef}
           className="experience absolute inset-0 h-screen w-full"
