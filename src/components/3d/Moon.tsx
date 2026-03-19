@@ -48,7 +48,7 @@ const Moon = () => {
     scene.add(orbitGroup);
 
     const shipAnchor = new THREE.Group();
-    let currentOrbitRadius = window.innerWidth < 768 ? 4.8 : 5.85;
+    let currentOrbitRadius = window.innerWidth < 768 ? 4.15 : 5.05;
     let currentShipScale = window.innerWidth < 768 ? 0.05 : 0.065;
     shipAnchor.position.set(-currentOrbitRadius, 0.3, 0);
     orbitGroup.add(shipAnchor);
@@ -206,7 +206,7 @@ const Moon = () => {
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      const nextOrbitRadius = width < 768 ? 4.8 : 5.85;
+      const nextOrbitRadius = width < 768 ? 4.15 : 5.05;
       const nextShipScale = width < 768 ? 0.05 : 0.065;
 
       camera.aspect = width / height;
