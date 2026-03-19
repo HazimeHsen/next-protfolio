@@ -51,6 +51,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLoadingRef = useRef(isLoading);
   const hasCompletedIntroRef = useRef(false);
+  const hasStartedOutroRef = useRef(false);
+  const playOutroRef = useRef<(() => void) | null>(null);
+  const finishIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -58,16 +61,19 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      if (hasCompletedIntroRef.current) return;
-      hasCompletedIntroRef.current = true;
-      setIsLoading(false);
-      onFadeOutComplete();
+      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
+      if (playOutroRef.current && !isLoadingRef.current) {
+        playOutroRef.current();
+        return;
+      }
+
+      finishIntroRef.current?.();
     }, 12000);
 
     return () => {
       window.clearTimeout(timeout);
     };
-  }, [onFadeOutComplete, setIsLoading]);
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -86,7 +92,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     renderer.setSize(ww, wh);
 
     const scene = new THREE.Scene();
-    scene.fog = new Fog(0x141414, 0, 100);
+    scene.fog = new Fog(0x03050b, 0, 100);
 
     let cameraRotationProxyX = 3.14159;
     let cameraRotationProxyY = 0;
@@ -138,26 +144,34 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     shipGroup.add(shipOrientationGroup);
 
     const texture = textureLoader.load(
-      "/3d/start-sphere/3d_space_5.jpg"
+      "/3d/start-sphere/space-tunnel-texture.png"
     );
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.offset.set(0, 0);
     texture.repeat.set(15, 2);
 
     const mapHeight = textureLoader.load(
-      "/3d/start-sphere/waveform-bump3.jpg"
+      "/3d/start-sphere/space-tunnel-bump.png"
     );
+    mapHeight.anisotropy = renderer.capabilities.getMaxAnisotropy();
     mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
     mapHeight.offset.set(0, 0);
     mapHeight.repeat.set(15, 2);
 
     const material = new MeshPhongMaterial({
       side: THREE.BackSide,
+      color: 0x8eb8ff,
       map: texture,
-      shininess: 20,
+      transparent: true,
+      opacity: 1,
+      shininess: 4,
       bumpMap: mapHeight,
-      bumpScale: -0.03,
-      specular: 0x000000,
+      bumpScale: -0.01,
+      specular: 0x0d1420,
+      emissive: 0x02050c,
+      emissiveIntensity: 0.18,
     });
 
     const tubeGeometry = new TubeGeometry(path, 300, tunnelRadius, 32, false);
@@ -168,7 +182,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const geo = new EdgesGeometry(innerTubeGeometry);
     const mat = new LineBasicMaterial({
       linewidth: 2,
-      opacity: 0.2,
+      opacity: 0.14,
+      color: 0x8ea7d6,
       transparent: true,
     });
     const wireframe = new LineSegments(geo, mat);
@@ -182,6 +197,75 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(ambientLight);
 
     let shipModel: THREE.Object3D | null = null;
+    const outroState = { progress: 0, tunnelOpacity: 1 };
+
+    const setShipOpacity = (opacity: number) => {
+      if (!shipModel) return;
+      shipModel.traverse((child) => {
+        if (!(child instanceof THREE.Mesh)) return;
+        const materials = Array.isArray(child.material)
+          ? child.material
+          : [child.material];
+
+        materials.forEach((meshMaterial) => {
+          meshMaterial.transparent = true;
+          meshMaterial.opacity = opacity;
+          meshMaterial.depthWrite = opacity > 0.2;
+          meshMaterial.needsUpdate = true;
+        });
+      });
+    };
+
+    const finishIntro = () => {
+      if (hasCompletedIntroRef.current) return;
+      hasCompletedIntroRef.current = true;
+      setIsLoading(false);
+      onFadeOutComplete();
+    };
+    finishIntroRef.current = finishIntro;
+
+    const playOutro = () => {
+      if (hasStartedOutroRef.current) return;
+      hasStartedOutroRef.current = true;
+
+      const outroTimeline = gsap.timeline({
+        defaults: { ease: "power2.inOut" },
+        onComplete: finishIntro,
+      });
+
+      outroTimeline.to(
+        outroState,
+        {
+          progress: 1,
+          duration: 1.2,
+        },
+        0
+      );
+
+      outroTimeline.to(
+        outroState,
+        {
+          tunnelOpacity: 0,
+          duration: 1.05,
+          onUpdate: () => {
+            light.intensity = 0.35 * outroState.tunnelOpacity;
+            ambientLight.intensity = 0.8 * outroState.tunnelOpacity;
+          },
+        },
+        1.15
+      );
+
+      outroTimeline.to(
+        canvasRef.current,
+        {
+          autoAlpha: 0,
+          duration: 0.7,
+          ease: "power1.inOut",
+        },
+        2
+      );
+    };
+    playOutroRef.current = playOutro;
 
     const getFrameVectors = (progress: number) => {
       const normalized = THREE.MathUtils.euclideanModulo(progress, 1);
@@ -210,6 +294,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         shipModel.rotation.x = THREE.MathUtils.degToRad(-8);
         shipModel.rotation.y = Math.PI;
         shipModel.rotation.z = THREE.MathUtils.degToRad(8);
+        setShipOpacity(1);
         shipOrientationGroup.add(shipModel);
       },
       undefined,
@@ -240,20 +325,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       onUpdate: () => {
         cameraTargetPercentage = tubePerc.percent;
       },
-      onComplete: () => {
-        if (hasCompletedIntroRef.current) return;
-        hasCompletedIntroRef.current = true;
-        gsap.to(canvasRef.current, {
-          autoAlpha: 0,
-          duration: 1,
-          ease: "power2.inOut",
-          onComplete: onFadeOutComplete,
-        });
-      },
+      onComplete: playOutro,
     });
 
     loadingManager.onLoad = () => {
-      if (hasCompletedIntroRef.current) return;
+      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
       setIsLoading(false);
       clock.start();
       introTween.play(0);
@@ -275,13 +351,23 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       const shipLookAhead = Math.min(shipProgress + 0.015, 0.995);
       const tunnelProgress = THREE.MathUtils.clamp(currentCameraPercentage / 0.96, 0, 1);
       const orbitPhase = elapsed * 2.4 + tunnelProgress * Math.PI * 1.75;
-      const radialDistance = tunnelRadius * 0.26;
+      const shipExitProgress = THREE.MathUtils.smoothstep(
+        tunnelProgress,
+        0.91,
+        0.96
+      );
+      const radialDistance = tunnelRadius * 0.26 * (1 - shipExitProgress * 0.92);
       const shipScaleBase =
         window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
       const shipScale =
         shipScaleBase *
         THREE.MathUtils.lerp(1.28, 0.86, tunnelProgress) *
-        THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2);
+        THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2) *
+        THREE.MathUtils.lerp(1, 0.015, shipExitProgress) *
+        THREE.MathUtils.lerp(1, 0.03, outroState.progress);
+      const shipOpacity =
+        THREE.MathUtils.lerp(1, 0, shipExitProgress) *
+        THREE.MathUtils.lerp(1, 0, outroState.progress);
 
       getFrameVectors(shipProgress);
       path.getPointAt(shipProgress, shipProgressPoint);
@@ -309,6 +395,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         Math.cos(orbitPhase) * 0.18 + THREE.MathUtils.degToRad(6)
       );
       shipOrientationGroup.scale.setScalar(shipScale);
+      setShipOpacity(shipOpacity);
+      material.opacity = outroState.tunnelOpacity;
+      mat.opacity = 0.14 * outroState.tunnelOpacity;
+      material.needsUpdate = true;
+      mat.needsUpdate = true;
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
@@ -329,6 +420,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      playOutroRef.current = null;
+      finishIntroRef.current = null;
       introTween.kill();
       if (frameId) {
         cancelAnimationFrame(frameId);
