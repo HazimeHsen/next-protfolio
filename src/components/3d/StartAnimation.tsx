@@ -60,11 +60,10 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   const finishIntroRef = useRef<(() => void) | null>(null);
   const [showLoader, setShowLoader] = useState(true);
 
-  // Hard safety net — if nothing works after 10s, just proceed
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       finishIntroRef.current?.();
-    }, 10000);
+    }, 12000);
     return () => window.clearTimeout(timeout);
   }, []);
 
@@ -95,8 +94,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     camera.rotation.z = cameraRotationProxyY;
 
     const c = new Group();
-    // ── Start at z=0 on the path, NOT z=400 ──────────────────────────────────
-    c.position.set(10, 89, 0);
     c.add(camera);
     scene.add(c);
 
@@ -119,7 +116,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const textureLoader = new TextureLoader(loadingManager);
     const gltfLoader = new GLTFLoader(loadingManager);
 
-    // Clock always running from mount
     const clock = new THREE.Clock();
     clock.start();
 
@@ -129,8 +125,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const shipOffset = new Vector3();
     const shipProgressPoint = new Vector3();
     const shipLookAheadPoint = new Vector3();
-    const shipEntryPoint = new Vector3();
-    const shipEntryBlendPosition = new Vector3();
     const shipPosition = new Vector3();
     const shipLookDirection = new Vector3();
     const shipNormal = new Vector3();
@@ -144,38 +138,18 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(shipGroup);
     shipGroup.add(shipOrientationGroup);
 
-    // ── Track texture/gltf loading independently ──────────────────────────────
     let texturesReady = false;
-    let gltfAttempted = false; // true whether load succeeded or failed
+    let gltfAttempted = false;
     let introStartScheduled = false;
+    let isReady = false;
 
-    const checkAndTriggerReady = () => {
-      // We're ready once textures are done AND gltf has been attempted (pass or fail)
-      if (!texturesReady || !gltfAttempted) return;
-      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
-
-      setIsLoading(false);
-      updateCameraPercentage(0);
-      gsap.set(rootRef.current, { autoAlpha: 1 });
-    };
-
-    const texture = textureLoader.load(
-      "/3d/start-sphere/space-tunnel-texture.png",
-      () => { /* loaded via manager */ },
-      undefined,
-      () => { /* error — manager still fires onLoad for other assets */ }
-    );
+    const texture = textureLoader.load("/3d/start-sphere/space-tunnel-texture.png");
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(15, 2);
 
-    const mapHeight = textureLoader.load(
-      "/3d/start-sphere/space-tunnel-bump.png",
-      () => { /* loaded via manager */ },
-      undefined,
-      () => { /* error — continue anyway */ }
-    );
+    const mapHeight = textureLoader.load("/3d/start-sphere/space-tunnel-bump.png");
     mapHeight.anisotropy = renderer.capabilities.getMaxAnisotropy();
     mapHeight.wrapS = mapHeight.wrapT = THREE.RepeatWrapping;
     mapHeight.repeat.set(15, 2);
@@ -199,11 +173,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     scene.add(tube);
 
     const innerTubeGeometry = new TubeGeometry(
-      path,
-      150,
-      tunnelRadius - 0.6,
-      32,
-      false
+      path, 150, tunnelRadius - 0.6, 32, false
     );
     const geo = new EdgesGeometry(innerTubeGeometry);
     const mat = new LineBasicMaterial({
@@ -217,13 +187,21 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     const light = new PointLight(0xffffff, 0.35, 4, 0);
     scene.add(light);
-
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
     let shipModel: THREE.Object3D | null = null;
-    const introState = { shipReveal: 0, shipEntry: 0, shipBoost: 0 };
-    const outroState = { shipOpacity: 1 };
+
+    const shipState = {
+      reveal: 0,
+      boost: 0,
+      entry: 0,
+      tilt: 0,
+    };
+
+    // outroProgress drives the camera zoom — tweened directly by GSAP
+    // so the render loop reads it each frame and gets the exact position
+    const outroState = { progress: 0 };
 
     const setShipOpacity = (opacity: number) => {
       if (!shipModel) return;
@@ -249,37 +227,77 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     };
     finishIntroRef.current = finishIntro;
 
+    // ── Outro ─────────────────────────────────────────────────────────────────
+    // Triggered the frame tunnelProgress crosses 0.91 so it is perfectly
+    // parallel with shipExitProgress starting to rise.
+    //
+    // Timeline:
+    //  t=0.00  outroState.progress starts tweening 0→1 with power3.in
+    //          → render loop reads this and pushes cameraTargetPercentage
+    //            forward aggressively, producing a visible warp/zoom-in
+    //  t=0.25  canvas starts fading — zoom has been visible for 0.25 s already
+    //  t=0.55  canvas fully black → finishIntro fires
     const playOutro = () => {
       if (hasStartedOutroRef.current) return;
       hasStartedOutroRef.current = true;
 
-      const tl = gsap.timeline({
-        defaults: { ease: "power2.inOut" },
-        onComplete: finishIntro,
-      });
-      tl.to(outroState, { shipOpacity: 0, duration: 0.7 }, 0);
-      tl.to(rootRef.current, { autoAlpha: 0, duration: 0.22, ease: "power1.inOut" }, 0);
+      // Snapshot the camera position at the moment outro starts
+      const outroStartPercent = cameraTargetPercentage;
+
+      const tl = gsap.timeline({ onComplete: finishIntro });
+
+      // Drive cameraTargetPercentage from current → 1.5
+      // (well past the end of the path — gives real warp sensation)
+      // Using a plain object so the render loop can read it every frame
+      const camProxy = { value: outroStartPercent };
+      tl.to(camProxy, {
+        value: Math.min(outroStartPercent + 0.18, 0.999),
+        duration: 0.55,
+        ease: "power3.in",  // accelerating rush into the tunnel
+        onUpdate: () => {
+          cameraTargetPercentage = camProxy.value;
+        },
+      }, 0);
+
+      // FOV punch: widen field of view to sell the speed sensation
+      tl.to(camera, {
+        fov: 75,            // from 45 → 75 (feels like warping)
+        duration: 0.55,
+        ease: "power3.in",
+        onUpdate: () => { camera.updateProjectionMatrix(); },
+      }, 0);
+
+      // Canvas fade starts AFTER zoom has been playing for 0.25 s
+      // so the viewer clearly sees the rush before it goes black
+      tl.to(rootRef.current, {
+        autoAlpha: 0,
+        duration: 0.3,
+        ease: "power2.in",
+      }, 0.25);
     };
     playOutroRef.current = playOutro;
 
-    const getFrameVectors = (progress: number) => {
-      const normalized = THREE.MathUtils.euclideanModulo(progress, 1);
-      const frameIndexFloat = normalized * frenetFrames.tangents.length;
-      const frameIndex = Math.floor(frameIndexFloat) % frenetFrames.tangents.length;
-      const nextFrameIndex = (frameIndex + 1) % frenetFrames.tangents.length;
-      const frameAlpha = frameIndexFloat - frameIndex;
-
-      shipNormal
-        .copy(frenetFrames.normals[frameIndex])
-        .lerp(frenetFrames.normals[nextFrameIndex], frameAlpha)
-        .normalize();
-      shipBinormal
-        .copy(frenetFrames.binormals[frameIndex])
-        .lerp(frenetFrames.binormals[nextFrameIndex], frameAlpha)
-        .normalize();
+    const checkAndTriggerReady = () => {
+      if (!texturesReady || !gltfAttempted) return;
+      if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
+      isReady = true;
+      setIsLoading(false);
+      updateCameraPercentage(0);
+      gsap.set(rootRef.current, { autoAlpha: 1 });
     };
 
-    // ── GLTF: mark attempted whether it succeeds or fails ────────────────────
+    loadingManager.onLoad = () => {
+      texturesReady = true;
+      checkAndTriggerReady();
+    };
+
+    const managerFallback = window.setTimeout(() => {
+      if (!texturesReady) {
+        texturesReady = true;
+        checkAndTriggerReady();
+      }
+    }, 3000);
+
     gltfLoader.load(
       "/3d/space_ship_wg-02/space_ship.gltf",
       (gltf) => {
@@ -297,15 +315,32 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       },
       undefined,
       () => {
-        // Failed — but don't block the intro
         shipModel = null;
         gltfAttempted = true;
         checkAndTriggerReady();
       }
     );
 
+    const getFrameVectors = (progress: number) => {
+      const normalized = THREE.MathUtils.euclideanModulo(progress, 1);
+      const frameIndexFloat = normalized * frenetFrames.tangents.length;
+      const frameIndex =
+        Math.floor(frameIndexFloat) % frenetFrames.tangents.length;
+      const nextFrameIndex =
+        (frameIndex + 1) % frenetFrames.tangents.length;
+      const frameAlpha = frameIndexFloat - frameIndex;
+      shipNormal
+        .copy(frenetFrames.normals[frameIndex])
+        .lerp(frenetFrames.normals[nextFrameIndex], frameAlpha)
+        .normalize();
+      shipBinormal
+        .copy(frenetFrames.binormals[frameIndex])
+        .lerp(frenetFrames.binormals[nextFrameIndex], frameAlpha)
+        .normalize();
+    };
+
     const updateCameraPercentage = (percentage: number) => {
-      const clamped = Math.min(Math.max(percentage, 0), 0.999);
+      const clamped = THREE.MathUtils.clamp(percentage, 0, 0.999);
       const p1 = path.getPointAt(clamped);
       const p2 = path.getPointAt(Math.min(clamped + 0.03, 0.999));
       c.position.set(p1.x, p1.y, p1.z);
@@ -313,7 +348,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       light.position.set(p2.x, p2.y, p2.z);
     };
 
-    // Initialise camera on path immediately so first frame looks correct
     updateCameraPercentage(0);
 
     let cameraTargetPercentage = 0;
@@ -326,7 +360,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       ease: "linear",
       paused: true,
       onUpdate: () => { cameraTargetPercentage = tubePerc.percent; },
-      onComplete: playOutro,
     });
 
     const startIntro = () => {
@@ -337,12 +370,43 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       ) return;
       hasStartedIntroRef.current = true;
 
-      gsap.set(introState, { shipReveal: 0, shipEntry: 0, shipBoost: 0 });
+      gsap.set(shipState, { reveal: 0, boost: 0, entry: 0, tilt: 0 });
       introTween.play(0);
 
-      gsap.to(introState, { shipReveal: 1, duration: 0.55, delay: 0.5, ease: "power2.out" });
-      gsap.to(introState, { shipEntry: 1, duration: 1.2, delay: 0.5, ease: "power3.out" });
-      gsap.to(introState, { shipBoost: 1, duration: 1.45, delay: 0.5, ease: "expo.out" });
+      gsap.to(shipState, {
+        reveal: 1,
+        duration: 0.45,
+        delay: 0.5,
+        ease: "power2.out",
+      });
+
+      gsap.to(shipState, {
+        boost: 1,
+        duration: 1.6,
+        delay: 0.5,
+        ease: "expo.out",
+      });
+
+      gsap.to(shipState, {
+        entry: 1,
+        duration: 1.3,
+        delay: 0.5,
+        ease: "power4.out",
+      });
+
+      gsap.to(shipState, {
+        tilt: 1,
+        duration: 0.55,
+        delay: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+          gsap.to(shipState, {
+            tilt: 0,
+            duration: 0.9,
+            ease: "power3.inOut",
+          });
+        },
+      });
     };
 
     const scheduleIntroStart = () => {
@@ -366,66 +430,70 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       });
     };
 
-    // ── loadingManager covers textures; onLoad fires when both textures done ──
-    loadingManager.onLoad = () => {
-      texturesReady = true;
-      checkAndTriggerReady();
-    };
-
-    // Fallback: if loadingManager never fires within 3s, force-ready anyway
-    const managerFallback = window.setTimeout(() => {
-      if (!texturesReady) {
-        texturesReady = true;
-        checkAndTriggerReady();
-      }
-    }, 3000);
-
-    // ── Render loop — ALWAYS renders, no gating ───────────────────────────────
     let frameId = 0;
-    let isReady = false; // local mirror, avoids ref reads in hot loop
 
     const render = () => {
       frameId = requestAnimationFrame(render);
 
-      // Keep checking if we've become ready this frame
       if (!isReady) {
-        const ready =
-          texturesReady && gltfAttempted && !hasCompletedIntroRef.current;
-        if (ready) {
-          isReady = true;
-          gsap.set(rootRef.current, { autoAlpha: 1 });
-          scheduleIntroStart();
-        }
-        // Still render the tunnel even while loading so there's no freeze
         composer.render();
         return;
       }
 
+      scheduleIntroStart();
+
       const elapsed = clock.getElapsedTime();
-      currentCameraPercentage = cameraTargetPercentage;
+
+      // During outro the camera is driven by the GSAP tween in playOutro,
+      // not by introTween — so we only copy tubePerc when intro is still running
+      if (!hasStartedOutroRef.current) {
+        currentCameraPercentage = cameraTargetPercentage;
+      } else {
+        // Outro: cameraTargetPercentage is already being pushed by the tween
+        // in playOutro via camProxy — just clamp and apply
+        currentCameraPercentage = THREE.MathUtils.clamp(
+          cameraTargetPercentage, 0, 0.999
+        );
+      }
 
       camera.rotation.y += (cameraRotationProxyX - camera.rotation.y) / 15;
       camera.rotation.x += (cameraRotationProxyY - camera.rotation.x) / 15;
 
-      const shipPathOffset = THREE.MathUtils.lerp(0.24, 0.045, introState.shipBoost);
+      const tunnelProgress = THREE.MathUtils.clamp(
+        currentCameraPercentage / 0.96, 0, 1
+      );
+
+      // ── Fire outro the exact frame ship exit fade begins ─────────────────
+      if (tunnelProgress >= 0.91 && !hasStartedOutroRef.current) {
+        playOutro();
+      }
+
+      const orbitPhase = elapsed * 2.4 + tunnelProgress * Math.PI * 1.75;
+
+      const shipPathOffset = THREE.MathUtils.lerp(0.24, 0.045, shipState.boost);
       const shipProgress = Math.min(currentCameraPercentage + shipPathOffset, 0.985);
       const shipLookAhead = Math.min(shipProgress + 0.015, 0.995);
-      const tunnelProgress = THREE.MathUtils.clamp(currentCameraPercentage / 0.96, 0, 1);
-      const orbitPhase = elapsed * 2.4 + tunnelProgress * Math.PI * 1.75;
-      const shipExitProgress = THREE.MathUtils.smoothstep(tunnelProgress, 0.91, 0.96);
-      const radialDistance = tunnelRadius * 0.26 * (1 - shipExitProgress * 0.92);
-      const shipScaleBase = window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
+
+      const shipExitProgress = THREE.MathUtils.smoothstep(
+        tunnelProgress, 0.91, 0.96
+      );
+      const radialDistance =
+        tunnelRadius * 0.26 * (1 - shipExitProgress * 0.92);
+
+      const shipScaleBase =
+        window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
+
+      // Ship opacity owned entirely by entry reveal + exit fade
+      const shipOpacity =
+        shipState.reveal * THREE.MathUtils.lerp(1, 0, shipExitProgress);
+
       const shipScale =
         shipScaleBase *
-        THREE.MathUtils.lerp(0.18, 1, introState.shipReveal) *
+        THREE.MathUtils.lerp(0.05, 1.0, shipState.boost) *
+        THREE.MathUtils.lerp(0.0,  1.0, shipState.reveal) *
         THREE.MathUtils.lerp(1.28, 0.86, tunnelProgress) *
         THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2) *
-        THREE.MathUtils.lerp(1, 0.015, shipExitProgress) *
-        THREE.MathUtils.lerp(1, 0.03, 1 - outroState.shipOpacity);
-      const shipOpacity =
-        introState.shipReveal *
-        THREE.MathUtils.lerp(1, 0.22, shipExitProgress) *
-        outroState.shipOpacity;
+        THREE.MathUtils.lerp(1.0,  0.015, shipExitProgress);
 
       getFrameVectors(shipProgress);
       path.getPointAt(shipProgress, shipProgressPoint);
@@ -440,16 +508,18 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
             .multiplyScalar(Math.sin(orbitPhase) * radialDistance * 0.58)
         );
       shipPosition.copy(shipProgressPoint).add(shipOffset);
-      camera.getWorldDirection(cameraForward);
-      shipEntryPoint
-        .copy(c.position)
-        .addScaledVector(cameraForward, 10)
-        .addScaledVector(shipBinormal, tunnelRadius * 3.6)
-        .addScaledVector(shipNormal, -tunnelRadius * 2.2);
-      shipEntryBlendPosition.copy(shipEntryPoint).lerp(shipPosition, introState.shipEntry);
-      shipPosition.copy(shipEntryBlendPosition);
-      shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
 
+      camera.getWorldDirection(cameraForward);
+
+      const spawnPoint = new Vector3()
+        .copy(c.position)
+        .addScaledVector(cameraForward, 16)
+        .addScaledVector(shipBinormal, tunnelRadius * 6.5)
+        .addScaledVector(shipNormal,  -tunnelRadius * 4.0);
+
+      shipPosition.lerpVectors(spawnPoint, shipPosition, shipState.entry);
+
+      shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
       shipGroup.position.copy(shipPosition);
       shipLookTarget.copy(shipPosition).add(shipLookDirection);
       shipOrientationGroup.lookAt(shipLookTarget);
@@ -457,15 +527,24 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       shipOrientationGroup.rotateX(
         THREE.MathUtils.degToRad(-6) + Math.sin(elapsed * 2.2) * 0.08
       );
-      shipOrientationGroup.rotateZ(
-        Math.cos(orbitPhase) * 0.18 + THREE.MathUtils.degToRad(6)
+
+      const bankRoll =
+        Math.cos(orbitPhase) * 0.18 +
+        THREE.MathUtils.degToRad(6) +
+        shipState.tilt * THREE.MathUtils.degToRad(35);
+
+      shipOrientationGroup.rotateZ(bankRoll);
+      shipOrientationGroup.rotateX(
+        shipState.tilt * THREE.MathUtils.degToRad(-18)
       );
+
       shipOrientationGroup.scale.setScalar(shipScale);
       setShipOpacity(shipOpacity);
 
       updateCameraPercentage(currentCameraPercentage);
       composer.render();
     };
+
     render();
 
     const handleResize = () => {
@@ -484,7 +563,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       playOutroRef.current = null;
       finishIntroRef.current = null;
       introTween.kill();
-      gsap.killTweensOf(introState);
+      gsap.killTweensOf(shipState);
       gsap.killTweensOf(outroState);
       if (frameId) cancelAnimationFrame(frameId);
       scene.remove(tube);
