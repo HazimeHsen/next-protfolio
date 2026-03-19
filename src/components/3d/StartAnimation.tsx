@@ -131,6 +131,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     const shipBinormal = new Vector3();
     const shipBinormalOffset = new Vector3();
     const cameraForward = new Vector3();
+    const cameraUp = new Vector3();
     const shipLookTarget = new Vector3();
     const shipMobileScale = 0.12;
     const shipDesktopScale = 0.16;
@@ -192,6 +193,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
     let shipModel: THREE.Object3D | null = null;
 
+    // ── Animation state ───────────────────────────────────────────────────────
+    // reveal  : 0→1  opacity fade-in as ship enters frame
+    // boost   : 0→1  path offset shrinks — ship rushes from deep behind into slot
+    // entry   : 0→1  position lerp from spawn → orbit
+    // tilt    : 0→1→0 dramatic nose-up pitch + roll on the climb arc
     const shipState = {
       reveal: 0,
       boost: 0,
@@ -199,8 +205,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       tilt: 0,
     };
 
-    // outroProgress drives the camera zoom — tweened directly by GSAP
-    // so the render loop reads it each frame and gets the exact position
     const outroState = { progress: 0 };
 
     const setShipOpacity = (opacity: number) => {
@@ -227,48 +231,31 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     };
     finishIntroRef.current = finishIntro;
 
-    // ── Outro ─────────────────────────────────────────────────────────────────
-    // Triggered the frame tunnelProgress crosses 0.91 so it is perfectly
-    // parallel with shipExitProgress starting to rise.
-    //
-    // Timeline:
-    //  t=0.00  outroState.progress starts tweening 0→1 with power3.in
-    //          → render loop reads this and pushes cameraTargetPercentage
-    //            forward aggressively, producing a visible warp/zoom-in
-    //  t=0.25  canvas starts fading — zoom has been visible for 0.25 s already
-    //  t=0.55  canvas fully black → finishIntro fires
     const playOutro = () => {
       if (hasStartedOutroRef.current) return;
       hasStartedOutroRef.current = true;
 
-      // Snapshot the camera position at the moment outro starts
       const outroStartPercent = cameraTargetPercentage;
+      const camProxy = { value: outroStartPercent };
 
       const tl = gsap.timeline({ onComplete: finishIntro });
 
-      // Drive cameraTargetPercentage from current → 1.5
-      // (well past the end of the path — gives real warp sensation)
-      // Using a plain object so the render loop can read it every frame
-      const camProxy = { value: outroStartPercent };
       tl.to(camProxy, {
         value: Math.min(outroStartPercent + 0.18, 0.999),
         duration: 0.55,
-        ease: "power3.in",  // accelerating rush into the tunnel
+        ease: "power3.in",
         onUpdate: () => {
           cameraTargetPercentage = camProxy.value;
         },
       }, 0);
 
-      // FOV punch: widen field of view to sell the speed sensation
       tl.to(camera, {
-        fov: 75,            // from 45 → 75 (feels like warping)
+        fov: 75,
         duration: 0.55,
         ease: "power3.in",
         onUpdate: () => { camera.updateProjectionMatrix(); },
       }, 0);
 
-      // Canvas fade starts AFTER zoom has been playing for 0.25 s
-      // so the viewer clearly sees the rush before it goes black
       tl.to(rootRef.current, {
         autoAlpha: 0,
         duration: 0.3,
@@ -362,6 +349,22 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       onUpdate: () => { cameraTargetPercentage = tubePerc.percent; },
     });
 
+    // ── Cinematic bottom-launch entry ─────────────────────────────────────────
+    //
+    // The ship spawns BELOW and BEHIND the camera view — completely out of frame.
+    // It then:
+    //   1. Appears tiny (boost=0 → small scale, reveal=0 → invisible)
+    //   2. Accelerates upward into frame (entry 0→1 via expo.out)
+    //   3. Simultaneously rushes forward from far-behind into formation (boost 0→1)
+    //   4. Pitches nose-up dramatically on the climb (tilt 0→1→0)
+    //   5. Settles into normal orbital cruise
+    //
+    // Spawn geometry (in render loop):
+    //   - spawnDepth : pushed FORWARD along camera direction (so it's in front,
+    //                  not behind the near clip plane, but still "behind" visually
+    //                  because boost=0 puts it far ahead on the path)
+    //   - spawnDown  : pushed DOWN along -cameraUp so it's below the screen edge
+    //   - spawnBack  : slight back-offset on binormal for a diagonal feel
     const startIntro = () => {
       if (
         hasStartedIntroRef.current ||
@@ -371,39 +374,46 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       hasStartedIntroRef.current = true;
 
       gsap.set(shipState, { reveal: 0, boost: 0, entry: 0, tilt: 0 });
+
       introTween.play(0);
 
+      // Fade in once ship starts entering frame (~0.3s into entry arc)
       gsap.to(shipState, {
         reveal: 1,
-        duration: 0.45,
-        delay: 0.5,
+        duration: 0.5,
+        delay: 0.6,          // slight delay so first frame is fully off-screen
         ease: "power2.out",
       });
 
+      // Boost: expo.out — instant burst of acceleration from deep-behind into slot
       gsap.to(shipState, {
         boost: 1,
-        duration: 1.6,
+        duration: 1.8,
         delay: 0.5,
         ease: "expo.out",
       });
 
+      // Entry: ship travels from below-screen spawn to its orbit
+      // power4.out = very fast initial velocity, then eases into position
       gsap.to(shipState, {
         entry: 1,
-        duration: 1.3,
+        duration: 1.5,
         delay: 0.5,
         ease: "power4.out",
       });
 
+      // Tilt: nose pitches UP hard on launch, then levels to cruise
+      // Peak at tilt=1 then smoothly unwinds — gives a fighter-jet launch feel
       gsap.to(shipState, {
         tilt: 1,
-        duration: 0.55,
+        duration: 0.5,
         delay: 0.5,
-        ease: "power2.out",
+        ease: "power3.out",
         onComplete: () => {
           gsap.to(shipState, {
             tilt: 0,
-            duration: 0.9,
-            ease: "power3.inOut",
+            duration: 1.1,
+            ease: "power2.inOut",
           });
         },
       });
@@ -444,13 +454,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
 
       const elapsed = clock.getElapsedTime();
 
-      // During outro the camera is driven by the GSAP tween in playOutro,
-      // not by introTween — so we only copy tubePerc when intro is still running
       if (!hasStartedOutroRef.current) {
         currentCameraPercentage = cameraTargetPercentage;
       } else {
-        // Outro: cameraTargetPercentage is already being pushed by the tween
-        // in playOutro via camProxy — just clamp and apply
         currentCameraPercentage = THREE.MathUtils.clamp(
           cameraTargetPercentage, 0, 0.999
         );
@@ -463,7 +469,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         currentCameraPercentage / 0.96, 0, 1
       );
 
-      // ── Fire outro the exact frame ship exit fade begins ─────────────────
       if (tunnelProgress >= 0.91 && !hasStartedOutroRef.current) {
         playOutro();
       }
@@ -483,13 +488,12 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       const shipScaleBase =
         window.innerWidth < 768 ? shipMobileScale : shipDesktopScale;
 
-      // Ship opacity owned entirely by entry reveal + exit fade
       const shipOpacity =
         shipState.reveal * THREE.MathUtils.lerp(1, 0, shipExitProgress);
 
       const shipScale =
         shipScaleBase *
-        THREE.MathUtils.lerp(0.05, 1.0, shipState.boost) *
+        THREE.MathUtils.lerp(0.04, 1.0, shipState.boost) *
         THREE.MathUtils.lerp(0.0,  1.0, shipState.reveal) *
         THREE.MathUtils.lerp(1.28, 0.86, tunnelProgress) *
         THREE.MathUtils.lerp(0.96, 1.04, (Math.sin(orbitPhase) + 1) / 2) *
@@ -499,6 +503,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
       path.getPointAt(shipProgress, shipProgressPoint);
       path.getPointAt(shipLookAhead, shipLookAheadPoint);
 
+      // Orbital wobble in cruise
       shipOffset
         .copy(shipNormal)
         .multiplyScalar(Math.cos(orbitPhase) * radialDistance)
@@ -509,34 +514,58 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
         );
       shipPosition.copy(shipProgressPoint).add(shipOffset);
 
+      // ── Spawn point: directly below the camera view ───────────────────────
+      // We use camera's actual world-up so "below" is always screen-bottom
+      // regardless of tunnel orientation.
       camera.getWorldDirection(cameraForward);
+
+      // cameraUp: world up projected perpendicular to forward — true screen-up
+      cameraUp.set(0, 1, 0);
+      cameraUp
+        .addScaledVector(cameraForward, -cameraUp.dot(cameraForward))
+        .normalize();
+
+      // Spawn geometry:
+      //   8 units forward  → safely in front of near clip, visually "below"
+      //   8 × tunnelRadius down → well below the screen edge
+      //   1 × tunnelRadius sideways → slight diagonal, not dead-centre boring
+      const spawnForward  = 8;
+      const spawnDown     = tunnelRadius * 8.0;   // far below screen
+      const spawnSide     = tunnelRadius * 1.2;   // slight diagonal offset
 
       const spawnPoint = new Vector3()
         .copy(c.position)
-        .addScaledVector(cameraForward, 16)
-        .addScaledVector(shipBinormal, tunnelRadius * 6.5)
-        .addScaledVector(shipNormal,  -tunnelRadius * 4.0);
+        .addScaledVector(cameraForward,  spawnForward)
+        .addScaledVector(cameraUp,      -spawnDown)   // negative = downward
+        .addScaledVector(shipBinormal,   spawnSide);
 
+      // entry=0 → spawn point (below screen)
+      // entry=1 → orbital position (normal cruise)
       shipPosition.lerpVectors(spawnPoint, shipPosition, shipState.entry);
 
+      // ── Ship orientation ──────────────────────────────────────────────────
       shipLookDirection.copy(shipLookAheadPoint).sub(shipPosition).normalize();
       shipGroup.position.copy(shipPosition);
       shipLookTarget.copy(shipPosition).add(shipLookDirection);
       shipOrientationGroup.lookAt(shipLookTarget);
       shipOrientationGroup.rotateY(Math.PI);
+
+      // Base pitch + gentle breathing
       shipOrientationGroup.rotateX(
         THREE.MathUtils.degToRad(-6) + Math.sin(elapsed * 2.2) * 0.08
       );
 
-      const bankRoll =
-        Math.cos(orbitPhase) * 0.18 +
-        THREE.MathUtils.degToRad(6) +
-        shipState.tilt * THREE.MathUtils.degToRad(35);
+      // Cruise roll (orbital wobble)
+      const cruiseRoll =
+        Math.cos(orbitPhase) * 0.18 + THREE.MathUtils.degToRad(6);
 
-      shipOrientationGroup.rotateZ(bankRoll);
-      shipOrientationGroup.rotateX(
-        shipState.tilt * THREE.MathUtils.degToRad(-18)
-      );
+      // Entry: nose pitches UP hard (negative X = nose-up in local space)
+      // and rolls slightly as it arcs into position
+      const entryPitch = shipState.tilt * THREE.MathUtils.degToRad(-42); // nose-up launch
+      const entryRoll  = shipState.tilt * THREE.MathUtils.degToRad(28);  // banking arc
+
+      shipOrientationGroup.rotateZ(cruiseRoll + entryRoll);
+      shipOrientationGroup.rotateX(entryPitch);
 
       shipOrientationGroup.scale.setScalar(shipScale);
       setShipOpacity(shipOpacity);
