@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
+import LoadingPage from "@/components/LoadingPage/LoadingPage";
 import * as THREE from "three";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -319,6 +320,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
     loadingManager.onLoad = () => {
       if (hasStartedOutroRef.current || hasCompletedIntroRef.current) return;
       setIsLoading(false);
+      gsap.to(rootRef.current, {
+        autoAlpha: 1,
+        duration: 0.4,
+        ease: "power1.out",
+      });
       clock.start();
       introTween.play(0);
     };
@@ -442,15 +448,22 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({
   }, [onFadeOutComplete, setIsLoading]);
 
   return (
-    <div
-      ref={rootRef}
-      className={`fixed inset-0 z-10 ${isLoading ? "opacity-0" : "opacity-100"}`}>
+    <>
+      {isLoading && (
+        <div className="fixed inset-0 z-20 bg-black">
+          <LoadingPage />
+        </div>
+      )}
+      <div
+        ref={rootRef}
+        className="fixed inset-0 z-10 opacity-0">
       <canvas
         ref={canvasRef}
         className="experience absolute inset-0 h-screen w-full"
       />
       <div className="scrollTarget absolute top-0 z-0 w-24"></div>
-    </div>
+      </div>
+    </>
   );
 };
 
