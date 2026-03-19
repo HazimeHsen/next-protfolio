@@ -33,11 +33,11 @@ const MacbookModel: React.FC<MacbookModelProps> = ({
   const bodyMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: 0x1b1d22,
-        emissive: 0x050607,
-        emissiveIntensity: 0.14,
-        metalness: 0.34,
-        roughness: 0.5,
+        color: 0x1f2329,
+        emissive: 0x040506,
+        emissiveIntensity: 0.08,
+        metalness: 0.42,
+        roughness: 0.42,
         side: THREE.DoubleSide,
       }),
     []
@@ -45,11 +45,11 @@ const MacbookModel: React.FC<MacbookModelProps> = ({
   const frameMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: 0x2f333a,
-        emissive: 0x06070a,
-        emissiveIntensity: 0.12,
-        metalness: 0.28,
-        roughness: 0.46,
+        color: 0x353a42,
+        emissive: 0x050608,
+        emissiveIntensity: 0.08,
+        metalness: 0.34,
+        roughness: 0.38,
         side: THREE.DoubleSide,
       }),
     []
@@ -57,11 +57,11 @@ const MacbookModel: React.FC<MacbookModelProps> = ({
   const logoMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: 0xc8cdd5,
-        emissive: 0x101113,
-        emissiveIntensity: 0.1,
-        metalness: 0.25,
-        roughness: 0.36,
+        color: 0xd6dbe4,
+        emissive: 0x0a0b0d,
+        emissiveIntensity: 0.05,
+        metalness: 0.3,
+        roughness: 0.28,
         side: THREE.DoubleSide,
       }),
     []
@@ -89,6 +89,11 @@ const MacbookModel: React.FC<MacbookModelProps> = ({
     textureLoader.current.load(texture, (loadedTexture) => {
       loadedTexture.colorSpace = THREE.SRGBColorSpace;
       loadedTexture.flipY = false;
+      loadedTexture.generateMipmaps = true;
+      loadedTexture.minFilter = THREE.LinearMipmapLinearFilter;
+      loadedTexture.magFilter = THREE.LinearFilter;
+      loadedTexture.anisotropy = 16;
+      loadedTexture.needsUpdate = true;
       setScreenTexture(loadedTexture);
       setIsLoaded(true);
     });
@@ -105,6 +110,9 @@ const MacbookModel: React.FC<MacbookModelProps> = ({
         : screenTexture
           ? new THREE.MeshBasicMaterial({
               map: screenTexture,
+              transparent: false,
+              opacity: 1,
+              toneMapped: false,
             })
           : null;
 
